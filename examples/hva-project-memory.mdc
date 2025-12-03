@@ -1,0 +1,385 @@
+---
+description: 🛡️ PROJECT MEMORY - Read before ANY action
+globs: **/*
+alwaysApply: true
+---
+
+# 🧠 PROJECT MEMORY
+
+> **STOP!** Read this before writing ANY code.
+> This is your memory. Without it, you'll break things.
+
+---
+
+## 🎯 WHAT IS THIS PROJECT?
+
+**Name:** HVA (Haitham Voice Assistant)
+**Purpose:** Arabic voice assistant with GUI dashboard
+**Status:** Development
+
+---
+
+## ⚡ HOW TO RUN
+
+> **Use ONLY these commands. Don't invent new ones.**
+
+```bash
+# Frontend (Electron + React):
+npm run electron  →  opens desktop app
+
+# Backend (FastAPI):
+cd api && uvicorn main:app --reload --port 8765
+```
+
+---
+
+## ⚠️ RUNNING NOW
+
+| Service | Port | Status |
+|---------|------|--------|
+| Electron App | - | 🟢 Running |
+| FastAPI | 8765 | 🟢 Running |
+| WebSocket | 8765 | 🟢 Connected |
+
+> **BEFORE starting any server:** Check this table!
+> **NEVER use port 8000 - we use 8765!**
+
+---
+
+## 🔧 TECH STACK (Detected)
+
+```yaml
+Frontend: React 18 + Electron    # from package.json
+Backend:  FastAPI + WebSocket    # from requirements.txt
+Database: SQLite (memories.db)   # from api/database/
+Styling:  Tailwind CSS           # from tailwind.config.js
+Voice:    OpenAI Whisper + TTS   # from api/services/
+AI:       Claude API             # from api/services/
+```
+
+> These are FACTS. Don't suggest Vue, Django, or other alternatives.
+
+---
+
+## 🗺️ FILE MAP
+
+> **BEFORE creating any file:** Check here first!
+
+```
+HVA/
+│
+├── 📂 src/                      # React frontend
+│   ├── components/              # 15 files - UI pieces
+│   │   ├── Sidebar.jsx          # Navigation
+│   │   ├── ChatWindow.jsx       # Main chat UI
+│   │   ├── VoiceButton.jsx      # Voice recording
+│   │   ├── MemoryPanel.jsx      # Memory display
+│   │   └── ToolkitView.jsx      # Debug tools
+│   ├── pages/                   # 4 files - Routes
+│   │   ├── Home.jsx
+│   │   ├── Settings.jsx
+│   │   ├── Memories.jsx
+│   │   └── Debug.jsx
+│   ├── hooks/                   # 3 files - Custom hooks
+│   │   ├── useWebSocket.js      # WS connection
+│   │   ├── useVoice.js          # Voice recording
+│   │   └── useMemory.js         # Memory operations
+│   ├── lib/                     # Utilities
+│   │   └── api.js               # API client
+│   ├── App.jsx                  # Main component
+│   └── main.jsx                 # Entry point
+│
+├── 📂 api/                      # FastAPI backend
+│   ├── main.py                  # Entry point + WebSocket
+│   ├── routes/                  # API endpoints
+│   │   ├── chat.py
+│   │   ├── voice.py
+│   │   └── memory.py
+│   ├── services/                # Business logic
+│   │   ├── ai_service.py        # Claude integration
+│   │   ├── voice_service.py     # Whisper + TTS
+│   │   └── memory_service.py    # Memory logic
+│   └── database/
+│       ├── db.py                # SQLite connection
+│       └── memories.db          # Database file
+│
+├── 📂 electron/                 # Electron main
+│   └── main.js
+│
+└── 📄 Config files
+    ├── package.json
+    ├── vite.config.js
+    ├── tailwind.config.js
+    └── requirements.txt
+```
+
+### Key Files (Don't Duplicate!)
+
+| File | Purpose | Warning |
+|------|---------|---------|
+| `src/hooks/useWebSocket.js` | WS connection | ⚠️ Changes break voice |
+| `api/main.py` | Server + WS | ⚠️ Port 8765 hardcoded |
+| `src/lib/api.js` | API calls | ⚠️ Base URL here |
+| `api/database/db.py` | DB connection | ⚠️ Path to memories.db |
+
+---
+
+## 🔗 CONNECTIONS MAP
+
+> How parts talk to each other:
+
+```
+Electron App
+    ↓ renders
+React Frontend (:5173 dev / electron prod)
+    ↓ WebSocket
+FastAPI (:8765)
+    ↓ calls
+Claude API (external)
+    ↓ stores
+SQLite (memories.db)
+```
+
+### API Endpoints
+
+| Endpoint | Method | Used By |
+|----------|--------|---------|
+| `/ws` | WebSocket | useWebSocket.js |
+| `/api/chat` | POST | ChatWindow.jsx |
+| `/api/voice/transcribe` | POST | useVoice.js |
+| `/api/voice/speak` | POST | ChatWindow.jsx |
+| `/api/memories` | GET/POST | MemoryPanel.jsx |
+
+### WebSocket Events
+
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `message` | Both | Chat messages |
+| `voice_start` | Client→Server | Start recording |
+| `voice_end` | Client→Server | Stop recording |
+| `transcription` | Server→Client | Voice text |
+| `status` | Server→Client | Connection status |
+
+---
+
+## 🔄 CHANGE MANAGEMENT
+
+### Change Classification (Your Responsibility)
+
+When the user asks for ANY change, you MUST:
+
+1. **Classify** the request into one of three types
+2. **State** the classification explicitly in your reply
+3. **Apply** the rules for that type
+
+> The user does NOT need to know these classifications.
+> It's YOUR job to infer and apply the correct rules.
+
+### Classification Types
+
+#### 1️⃣ PURE_UI_STYLE
+
+**What it is:**
+- Visual-only changes: colors, spacing, font sizes, alignment, labels, button text, headings
+- No new logic, no new state, no component structure changes
+
+**Rules:**
+```
+✅ Only touch CSS/styling and JSX/HTML text
+❌ Do NOT create or delete files
+❌ Do NOT rename components
+❌ Do NOT change function signatures or add/remove hooks
+❌ Do NOT change routing, data flow, or API calls
+```
+
+#### 2️⃣ UI_BEHAVIOUR_TWEAK
+
+**What it is:**
+- Same screen, same components
+- Change WHEN or HOW something happens (button enabled/disabled, which message appears, default tab, etc.)
+
+**Rules:**
+```
+✅ Edit existing components/functions
+✅ Reuse existing patterns and utilities
+❌ Do NOT add new pages/routes
+❌ Do NOT refactor project structure
+❌ Limit changes to MINIMUM files needed
+```
+
+#### 3️⃣ NEW_FEATURE_FLOW
+
+**What it is:**
+- New screen, new route, or new user flow
+- New domain concept or major capability
+
+**Rules:**
+```
+BEFORE coding:
+  □ Update this memory file with new flow description
+  □ Confirm design with user in 3-5 bullet points
+
+DURING implementation:
+  □ Reuse existing architecture and conventions
+  □ Don't change stable parts without user approval
+
+AFTER implementation:
+  □ List new files/routes/components added
+  □ Update FILE MAP and RECENT CHANGES
+```
+
+### Quick Examples
+
+| User Request | Classification |
+|--------------|----------------|
+| "اجعل الزر أكبر" | PURE_UI_STYLE |
+| "غير النص لعربي" | PURE_UI_STYLE |
+| "Change button color to blue" | PURE_UI_STYLE |
+| "الزر يشتغل بس لما يكون في input" | UI_BEHAVIOUR_TWEAK |
+| "أضف رسالة نجاح بعد الحفظ" | UI_BEHAVIOUR_TWEAK |
+| "Show error toast on failure" | UI_BEHAVIOUR_TWEAK |
+| "أضف صفحة Settings جديدة" | NEW_FEATURE_FLOW |
+| "أضف نظام إشعارات" | NEW_FEATURE_FLOW |
+| "Add user authentication" | NEW_FEATURE_FLOW |
+
+### Before You Touch Code (MANDATORY)
+
+For ANY change, you MUST:
+
+```
+1. RESTATE the change in 1-2 lines
+
+2. SHOW:
+   Classification: [PURE_UI_STYLE / UI_BEHAVIOUR_TWEAK / NEW_FEATURE_FLOW]
+   Files to modify: [list paths]
+   Will NOT change: [explicit boundaries]
+
+3. WAIT for user to say "ok" before proceeding
+
+4. AFTER changes:
+   - Explain what changed (files + behaviour)
+   - Add entry to RECENT CHANGES
+```
+
+**Example Response:**
+
+```
+You want to make the voice button larger.
+
+Classification: PURE_UI_STYLE
+Files to modify: src/components/VoiceButton.jsx (styling only)
+Will NOT change: voice logic, WebSocket connection, any hooks
+
+Can I proceed?
+```
+
+---
+
+## 📝 RECENT CHANGES
+
+> **AFTER every change:** Add a row here!
+
+| When | What Changed | Files Affected |
+|------|--------------|----------------|
+| Dec 3, 14:00 | Fixed WS reconnection | useWebSocket.js |
+| Dec 3, 12:00 | Added memory panel | MemoryPanel.jsx, memory.py |
+| Dec 2, 18:00 | Voice recording fix | useVoice.js, voice_service.py |
+
+---
+
+## ⚠️ KNOWN ISSUES
+
+> Current bugs or limitations:
+
+```
+1. WebSocket disconnects after 5min idle
+   → Related to: useWebSocket.js
+   → Don't touch: ping interval setting
+
+2. Memory search slow with 1000+ items
+   → Related to: memory_service.py
+   → Needs: pagination
+```
+
+---
+
+## 🚫 THINGS THAT BREAK EASILY
+
+```
+❌ Changing port from 8765 → Frontend can't connect
+❌ Changing WS path from /ws → Voice breaks
+❌ Deleting memories.db → All data lost
+❌ Changing api.js baseURL → Nothing works
+❌ Multiple uvicorn instances → Port conflict
+```
+
+---
+
+## 🔍 BEFORE ANY ACTION
+
+### Creating a file?
+```
+□ Checked FILE MAP - similar file exists?
+□ Know the correct folder?
+   - Components → src/components/
+   - Pages → src/pages/
+   - Hooks → src/hooks/
+   - API routes → api/routes/
+   - Services → api/services/
+□ Will update FILE MAP after?
+```
+
+### Modifying WebSocket?
+```
+⚠️ CAREFUL! WebSocket is fragile.
+□ useWebSocket.js handles client connection
+□ main.py handles server side
+□ Port MUST be 8765
+□ Will TEST after change?
+```
+
+### Starting a server?
+```
+□ Checked RUNNING NOW - already running?
+□ Using exact command from HOW TO RUN?
+□ Will update RUNNING NOW after?
+```
+
+### Fixing a bug?
+```
+□ Checked KNOWN ISSUES first?
+□ Checked RECENT CHANGES - was it working before?
+□ Will update KNOWN ISSUES after fix?
+```
+
+---
+
+## 💬 WHEN UNSURE
+
+Instead of guessing, say:
+
+> "I see the WebSocket runs on port 8765 and connects at /ws.
+> Before I modify the connection logic:
+> - Is the server currently running?
+> - Should I test with a simple ping first?
+> - This might disconnect the current session - proceed?"
+
+---
+
+## ✅ AFTER EVERY RESPONSE
+
+```
+□ Created a file?      → Update FILE MAP
+□ Changed structure?   → Update FILE MAP
+□ Started a server?    → Update RUNNING NOW
+□ Stopped a server?    → Update RUNNING NOW
+□ Changed port/path?   → Update CONNECTIONS MAP
+□ Fixed a bug?         → Update KNOWN ISSUES
+□ Did anything?        → Add to RECENT CHANGES
+□ Touched WebSocket?   → TEST IMMEDIATELY
+```
+
+---
+
+*🛡️ Guardian v3 - HVA Project Memory*
+*Last synced: 2024-12-03T14:30:00Z*

@@ -1,293 +1,290 @@
-# 🛡️ Project Guardian - Smart Installation Protocol
+# 🛡️ Guardian Installation - Smart Discovery
 
-> **FOR AI AGENTS ONLY** - Follow these steps precisely.
-> This creates a self-enforcing system that keeps you aligned with the project.
-
----
-
-## 🎯 INSTALLATION GOAL
-
-Create a `guardian.mdc` file that:
-1. You will read on EVERY user request
-2. Auto-updates when you make changes
-3. Prevents mistakes and forgotten context
+> **Your job:** Discover the project, build its memory, stay out of the way.
+> **Not your job:** Force rules, impose structure, ask many questions.
 
 ---
 
-## 📋 STEP 1: AUTO-DETECT ENVIRONMENT
+## 🎯 PHILOSOPHY
 
-### 1.1 Detect IDE (check in order):
+```
+Guardian is NOT a rulebook.
+Guardian IS a memory system.
 
-```bash
-# Check which IDE/tool is being used:
-if [ -d ".cursor" ]; then
-    IDE="cursor"
-    RULES_PATH=".cursor/rules/guardian.mdc"
-elif [ -d ".windsurf" ]; then
-    IDE="windsurf"  
-    RULES_PATH=".windsurf/rules/guardian.md"
-elif [ -d ".vscode" ]; then
-    IDE="vscode"
-    RULES_PATH=".github/copilot-instructions.md"
-else
-    IDE="unknown"
-    RULES_PATH="CLAUDE.md"  # Default for Claude Code/other
-fi
+You don't tell the project what to be.
+You discover what it is and remember it.
 ```
 
-**If auto-detect fails, ask:**
-> Which IDE are you using?
-> 1. Cursor
-> 2. Windsurf
-> 3. VS Code + Copilot
-> 4. Claude Code
-> 5. Other (specify)
+---
 
-### 1.2 Detect Project Type (check files):
+## 📋 INSTALLATION STEPS
+
+### STEP 1: Discover IDE & Set Target File
 
 ```bash
-# Frontend detection:
-if [ -f "package.json" ]; then
-    # Check for framework
-    grep -q "react" package.json && FRONTEND="React"
-    grep -q "vue" package.json && FRONTEND="Vue"
-    grep -q "angular" package.json && FRONTEND="Angular"
-    grep -q "next" package.json && FRONTEND="Next.js"
-    grep -q "svelte" package.json && FRONTEND="Svelte"
-fi
+# Check automatically, don't ask unless all fail:
 
-# Backend detection:
-if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
-    grep -q "fastapi" requirements.txt && BACKEND="FastAPI"
-    grep -q "django" requirements.txt && BACKEND="Django"
-    grep -q "flask" requirements.txt && BACKEND="Flask"
-fi
-
-if [ -f "package.json" ]; then
-    grep -q "express" package.json && BACKEND="Express.js"
-fi
+.cursor/         → Cursor       → TARGET: .cursor/rules/guardian.mdc
+.windsurf/       → Windsurf     → TARGET: .windsurf/rules/guardian.md  # Note: .md not .mdc
+.vscode/         → VS Code      → TARGET: .github/copilot-instructions.md
+none             → Claude/Other → TARGET: CLAUDE.md (root)
 ```
 
-**After detection, CONFIRM with user:**
-> I detected:
-> - Frontend: [detected or "Not detected"]
-> - Backend: [detected or "Not detected"]
-> - Database: [detected or "Not detected"]
+> **Important:** Save the TARGET path - you'll use it in STEP 6.
+> Windsurf uses `.md` extension, others use `.mdc` or `.md` as shown.
+
+---
+
+### STEP 2: Discover Tech Stack (Silent)
+
+> **Note:** Use these detection methods conceptually. If you can't run shell commands directly, replicate their behavior by reading the actual files.
+
+```bash
+# Frontend - check package.json:
+"react" in dependencies      → React
+"vue" in dependencies        → Vue
+"angular" in dependencies    → Angular
+"next" in dependencies       → Next.js
+"svelte" in dependencies     → Svelte
+
+# Backend - check requirements.txt OR package.json:
+"fastapi" in requirements    → FastAPI
+"django" in requirements     → Django
+"flask" in requirements      → Flask
+"express" in dependencies    → Express
+
+# Database - check config files or imports:
+*.db files exist             → SQLite
+DATABASE_URL with postgres   → PostgreSQL
+DATABASE_URL with mysql      → MySQL
+"mongodb" in config          → MongoDB
+
+# Styling - check config files:
+tailwind.config exists       → Tailwind
+"styled-components" in pkg   → Styled Components
+*.scss files exist           → SASS
+```
+
+---
+
+### STEP 3: Discover File Structure (Silent)
+
+> **Note:** If you can't run `find`, manually browse the project folders, skipping `node_modules`, `.git`, `venv`, `__pycache__`, `.next`, `dist`, `build`.
+
+**Identify these folders:**
+- Where are components?
+- Where are pages/views?
+- Where is the API/backend?
+- Where are utilities/helpers?
+- What are the entry points?
+
+---
+
+### STEP 4: Discover Run Commands
+
+**Check these sources:**
+
+```
+package.json → "scripts" section:
+  - "dev", "start", "serve" = frontend
+  - "server", "api" = backend
+
+Python projects:
+  - uvicorn main:app / python main.py / flask run
+
+Docker:
+  - docker-compose.yml exists = docker-compose up
+
+Makefile:
+  - make run / make dev
+```
+
+**If not obvious, ask ONE question:**
+> "How do you run this project? (e.g., 'npm run dev' for frontend)"
+
+---
+
+### STEP 5: Discover Connections
+
+**Find ports and connections:**
+
+```
+Check .env files for PORT variables
+Check config files for localhost:XXXX
+Check API client files for baseURL
+Check WebSocket connections
+```
+
+---
+
+### STEP 6: Build the Memory File
+
+Fill the **TARGET file you identified in STEP 1** with discovered information.
+
+Use the template structure below. Make sure these **exact section names** exist:
+
+```markdown
+## ⚡ HOW TO RUN
+## ⚠️ RUNNING NOW
+## 🔧 TECH STACK (Detected)
+## 🗺️ FILE MAP
+## 🔗 CONNECTIONS MAP
+## 🔄 CHANGE MANAGEMENT
+## 📝 RECENT CHANGES
+## ⚠️ KNOWN ISSUES
+## 🚫 THINGS THAT BREAK EASILY
+```
+
+**Example filled content:**
+
+```markdown
+## ⚡ HOW TO RUN
+# Frontend:
+npm run dev  →  runs on localhost:5173
+
+# Backend:
+uvicorn main:app --reload  →  runs on localhost:8000
+
+## ⚠️ RUNNING NOW
+| Service | Port | Status |
+|---------|------|--------|
+| Frontend | 5173 | 🔴 Stopped |
+| Backend | 8000 | 🔴 Stopped |
+
+## 🔧 TECH STACK (Detected)
+Frontend: React 18       # from package.json
+Backend:  FastAPI        # from requirements.txt
+Database: SQLite         # from .db file found
+Styling:  Tailwind       # from tailwind.config.js
+
+## 🗺️ FILE MAP
+[Actual structure discovered]
+
+## 🔗 CONNECTIONS MAP
+Frontend (:5173) → Backend (:8000/api)
+```
+
+---
+
+### STEP 7: Create Reports Directory
+
+```bash
+mkdir -p ~/Desktop/guardian-reports
+```
+
+This folder will store debug reports from the Developer Toolkit.
+
+---
+
+### STEP 8: Confirm with User (Brief)
+
+> ✅ Guardian installed!
 > 
-> Is this correct? Any additions?
+> **Memory file:** [TARGET path from STEP 1]
+> 
+> I discovered:
+> - **Stack:** React + FastAPI + SQLite
+> - **Frontend:** `npm run dev` → localhost:5173
+> - **Backend:** `uvicorn main:app` → localhost:8000
+> - **Structure:** [X] components, [X] pages, [X] API routes
+> 
+> Does this look right? Anything to add?
 
 ---
 
-## 📋 STEP 2: SCAN PROJECT STRUCTURE
+## 🔄 AFTER INSTALLATION
 
-### 2.1 Build File Tree Automatically:
-
-```bash
-# Generate current structure (exclude node_modules, .git, etc.)
-find . -type f \
-    -not -path "*/node_modules/*" \
-    -not -path "*/.git/*" \
-    -not -path "*/__pycache__/*" \
-    -not -path "*/venv/*" \
-    -not -path "*/.next/*" \
-    -not -path "*/dist/*" \
-    -not -path "*/build/*" \
-    | head -50
-```
-
-### 2.2 Identify Key Folders:
-
-Look for and categorize:
-
-| Pattern | Category | Example |
-|---------|----------|---------|
-| `src/components/` or `components/` | Components | React/Vue components |
-| `src/pages/` or `pages/` or `views/` | Pages | Route pages |
-| `api/` or `server/` or `backend/` | Backend | API code |
-| `src/utils/` or `lib/` or `helpers/` | Utilities | Helper functions |
-| `public/` or `static/` or `assets/` | Static | Images, fonts |
-| `tests/` or `__tests__/` or `spec/` | Tests | Test files |
-
-### 2.3 Ask for Clarification ONLY if needed:
-
-> I found these main folders:
-> - `src/` - Frontend code
-> - `api/` - Backend code
-> - `public/` - Static files
->
-> Are there any other important folders I should know about?
-
----
-
-## 📋 STEP 3: GATHER CRITICAL DECISIONS
-
-Ask these questions (only if not auto-detected):
-
-### 3.1 Technology Decisions:
-
-> What technologies should I NEVER suggest changing? 
-> (These will be locked permanently)
->
-> Example answer: "React, FastAPI, PostgreSQL"
-
-### 3.2 Forbidden Technologies:
-
-> Any technologies you specifically DON'T want me to suggest?
->
-> Example answer: "No Vue, no Django, no MongoDB"
-
-### 3.3 Run Commands:
-
-> How do I run this project?
->
-> Example: "npm run dev" or "python main.py"
-
----
-
-## 📋 STEP 4: CREATE GUARDIAN FILE
-
-### 4.1 Create Rules Directory:
-
-```bash
-# Based on detected IDE:
-mkdir -p [RULES_PATH_DIRECTORY]
-```
-
-### 4.2 Generate guardian.mdc:
-
-**Use the template from `/templates/guardian.mdc` and fill in:**
-
-| Placeholder | Replace With |
-|-------------|--------------|
-| `{{FRONTEND}}` | Detected/confirmed frontend |
-| `{{BACKEND}}` | Detected/confirmed backend |
-| `{{DATABASE}}` | Detected/confirmed database |
-| `{{PROJECT_ROOT}}` | Current directory name |
-| `{{FOLDER_1}}`, etc. | Detected folders |
-| `{{RUN_COMMAND}}` | User-provided run command |
-| `{{TIMESTAMP}}` | Current ISO timestamp |
-| `{{FORBIDDEN_TECH}}` | User-specified forbidden tech |
-
-### 4.3 File Tree Format:
-
-Generate a clean, readable tree:
+### Your ongoing job:
 
 ```
-project-name/
-│
-├── 📂 src/                    # Frontend source
-│   ├── 📂 components/         # Reusable UI components
-│   │   ├── Button.jsx
-│   │   ├── Header.jsx
-│   │   └── ...
-│   ├── 📂 pages/              # Page components
-│   │   ├── Home.jsx
-│   │   └── ...
-│   └── 📂 utils/              # Helper functions
-│       └── api.js
-│
-├── 📂 api/                    # Backend source
-│   ├── main.py
-│   └── routes/
-│       └── ...
-│
-└── 📄 Configuration
-    ├── package.json
-    ├── requirements.txt
-    └── ...
+BEFORE every response:
+1. Re-read relevant sections of the memory file
+2. Check RUNNING NOW - what servers are active?
+3. Check FILE MAP - where do things go?
+4. Check CONNECTIONS MAP - what depends on what?
+
+AFTER every change:
+1. Update RECENT CHANGES
+2. Update FILE MAP if structure changed
+3. Update RUNNING NOW if server started/stopped
+4. Update KNOWN ISSUES if bug found/fixed
+```
+
+### When user asks you to do something:
+
+```
+1. Read the memory file
+2. Understand current state
+3. Plan your action
+4. Verify it won't break connections
+5. Do the work
+6. Update the memory file
+7. Tell user what you did
 ```
 
 ---
 
-## 📋 STEP 5: CREATE REPORTS DIRECTORY
+## 🔧 Optional: Developer Toolkit
 
-```bash
-# Create reports folder (Desktop for macOS permissions)
-mkdir -p ~/Desktop/guardian-reports
+If the project uses React, consider adding the debug toolkit:
+
+```
+1. Copy `templates/developer-toolkit/` into the frontend src folder
+2. Mount `ToolkitView` component on a route like `/dev-tools`
+3. Add a "Save for AI" button that exports debug reports
+4. Reports save to ~/Desktop/guardian-reports/
+```
+
+**This connects:**
+- `guardian.mdc` = Project memory (structure, decisions)
+- `Debug Report` = Runtime snapshot (errors, network, state)
+
+When debugging, tell the agent:
+> "Read ~/Desktop/guardian-reports/latest.json and fix what you find"
+
+---
+
+## ❌ WHAT NOT TO DO
+
+```
+❌ Don't ask many questions - discover silently
+❌ Don't impose structure - document what exists
+❌ Don't suggest tech changes - remember what's used
+❌ Don't start servers without checking RUNNING NOW
+❌ Don't create files without checking FILE MAP
+❌ Don't guess - ask when unsure
 ```
 
 ---
 
-## 📋 STEP 6: VERIFY INSTALLATION
-
-### Checklist before completing:
+## 🧠 REMEMBER
 
 ```
-□ guardian.mdc created in correct location?
-□ All placeholders replaced with real values?
-□ File tree matches actual project structure?
-□ Technology stack confirmed with user?
-□ Reports directory created?
-□ Run command is correct?
-```
+You have no memory between sessions.
+The memory file IS your memory.
 
----
+The user is non-technical.
+They can't re-explain everything each time.
 
-## 📋 STEP 7: FINAL MESSAGE TO USER
-
-After successful installation, tell the user:
-
-```
-✅ Project Guardian installed successfully!
-
-📁 Configuration: [path to guardian.mdc]
-📊 Reports folder: ~/Desktop/guardian-reports/
-
-🔒 Locked technologies:
-   • Frontend: [tech]
-   • Backend: [tech]
-   • Database: [tech]
-
-🎯 What this means for you:
-   • I'll remember your project structure
-   • I won't suggest changing your tech stack
-   • I'll check before creating new files
-   • I'll be honest when I'm not sure something works
-
-💡 Pro tip: If something breaks, run diagnostics and tell me:
-   "Read the debug report and fix what you find"
+Your job is to:
+- Remember for them
+- Prevent your own mistakes
+- Keep the project consistent
 ```
 
 ---
 
-## 🔧 TROUBLESHOOTING
+## 📁 File Naming Reference
 
-### "Permission denied" on macOS:
-```bash
-# Reports go to Desktop (has write permissions)
-mkdir -p ~/Desktop/guardian-reports
-chmod 755 ~/Desktop/guardian-reports
-```
-
-### "File not being read by IDE":
-- Cursor: Must be in `.cursor/rules/`
-- Windsurf: Must be `.md` not `.mdc`
-- VS Code: Must be `.github/copilot-instructions.md`
-
-### "User wants to update Guardian":
-```bash
-# Re-run installation, keeping existing decisions
-# Ask: "Keep existing locked technologies? (Y/n)"
-```
+| IDE | Target File |
+|-----|-------------|
+| Cursor | `.cursor/rules/guardian.mdc` |
+| Windsurf | `.windsurf/rules/guardian.md` |
+| VS Code + Copilot | `.github/copilot-instructions.md` |
+| Claude Code | `CLAUDE.md` |
+| Aider | `CONVENTIONS.md` |
+| Other | `PROJECT_MEMORY.md` |
 
 ---
 
-## 📊 INSTALLATION SUMMARY
-
-| Step | Action | Automated? |
-|------|--------|------------|
-| 1 | Detect IDE | ✅ Yes |
-| 2 | Detect tech stack | ✅ Yes (confirm with user) |
-| 3 | Scan file structure | ✅ Yes |
-| 4 | Get decisions | ❓ Ask only if needed |
-| 5 | Create guardian.mdc | ✅ Yes |
-| 6 | Create reports dir | ✅ Yes |
-| 7 | Verify & confirm | ✅ Yes |
-
-**Total user questions: 2-4 maximum**
-(Only what can't be auto-detected)
-
----
-
-*🛡️ Project Guardian - Smart Installation*
-*A Product by Imperfect Success*
+*🛡️ Guardian v3 - Discover, Remember, Protect*

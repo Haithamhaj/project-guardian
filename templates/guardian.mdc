@@ -1,277 +1,327 @@
 ---
-description: 🛡️ PROJECT GUARDIAN - MANDATORY RULES FOR AI AGENT
+description: 🛡️ PROJECT MEMORY - Read before ANY action
 globs: **/*
 alwaysApply: true
 ---
 
-# 🛡️ GUARDIAN PROTOCOL - ACTIVE
+# 🧠 PROJECT MEMORY
 
-> ⚠️ **MANDATORY**: This file controls ALL your actions in this project.
-> You MUST read relevant sections before EVERY response.
-> Violations will cause bugs and user frustration.
-
----
-
-# 🔴 SECTION 0: ENFORCEMENT RULES
-
-## On EVERY user request, you MUST:
-
-```
-1. IDENTIFY what sections apply to this request
-2. RE-READ those sections before responding  
-3. CHECK file tree before creating/modifying files
-4. VERIFY your changes don't violate any rules
-5. UPDATE this file if you made structural changes
-```
-
-## Auto-Update Triggers:
-
-| When this happens... | Update this section... |
-|---------------------|------------------------|
-| Created new file | → File Tree + Recent Changes |
-| Deleted file | → File Tree + Recent Changes |
-| Fixed a bug | → Current Issues + Recent Changes |
-| Made important decision | → Decision Log |
-| Changed project structure | → File Tree |
+> **STOP!** Read this before writing ANY code.
+> This is your memory. Without it, you'll break things.
 
 ---
 
-# 🔒 SECTION 1: LOCKED TECHNOLOGIES
+## 🎯 WHAT IS THIS PROJECT?
 
-## DO NOT SUGGEST ALTERNATIVES TO THESE:
+**Name:** [Discovered project name]
+**Purpose:** [One line - what does it do?]
+**Status:** Development / Production
+
+---
+
+## ⚡ HOW TO RUN
+
+> **Use ONLY these commands. Don't invent new ones.**
+
+```bash
+# Frontend:
+[COMMAND]  →  runs on localhost:[PORT]
+
+# Backend:
+[COMMAND]  →  runs on localhost:[PORT]
+```
+
+---
+
+## ⚠️ RUNNING NOW
+
+| Service | Port | Status |
+|---------|------|--------|
+| Frontend | [PORT] | 🟢 Running / 🔴 Stopped |
+| Backend | [PORT] | 🟢 Running / 🔴 Stopped |
+| Database | [PORT/-] | 🟢 Running / 🔴 Stopped |
+
+> **BEFORE starting any server:** Check this table!
+> **AFTER starting/stopping:** Update this table!
+
+---
+
+## 🔧 TECH STACK (Detected)
 
 ```yaml
-Frontend:
-  Framework: {{FRONTEND}}
-  UI_Library: {{UI_LIB}}
-  Styling: {{STYLING}}
-
-Backend:
-  Framework: {{BACKEND}}
-  Database: {{DATABASE}}
-  Auth: {{AUTH}}
-
-Tools:
-  Package_Manager: {{PKG_MANAGER}}
-  Language: {{LANGUAGE}}
+Frontend: [FRAMEWORK]     # source: package.json
+Backend:  [FRAMEWORK]     # source: requirements.txt / package.json
+Database: [DATABASE]      # source: config / .db file
+Styling:  [CSS METHOD]    # source: config file
 ```
 
-### ❌ FORBIDDEN (Never suggest these):
-```
-{{FORBIDDEN_TECH}}
-```
-
-### ✅ APPROVED (Safe to use):
-```
-{{APPROVED_LIBS}}
-```
+> These are FACTS from the codebase. Don't suggest alternatives.
 
 ---
 
-# 📁 SECTION 2: DYNAMIC FILE TREE
+## 🗺️ FILE MAP
 
-> **CRITICAL**: Check this BEFORE creating ANY file!
-> If file exists → modify it
-> If similar file exists → ASK before creating new one
-
-## Current Structure:
+> **BEFORE creating any file:** Check here first!
 
 ```
-{{PROJECT_ROOT}}/
+[PROJECT_NAME]/
 │
-├── 📂 {{FOLDER_1}}/          # {{FOLDER_1_DESC}}
-│   ├── {{FILE_1}}
-│   ├── {{FILE_2}}
-│   └── ...
+├── 📂 [FRONTEND_FOLDER]/        # [Description]
+│   ├── [subfolder]/             # [X files] - [Purpose]
+│   ├── [subfolder]/             # [X files] - [Purpose]
+│   └── [entry file]
 │
-├── 📂 {{FOLDER_2}}/          # {{FOLDER_2_DESC}}
-│   ├── {{FILE_3}}
-│   └── ...
-│
-├── 📂 {{FOLDER_3}}/          # {{FOLDER_3_DESC}}
-│   └── ...
+├── 📂 [BACKEND_FOLDER]/         # [Description]
+│   ├── [subfolder]/             # [X files] - [Purpose]
+│   └── [entry file]
 │
 └── 📄 Config files
-    ├── package.json
-    ├── {{CONFIG_1}}
-    └── {{CONFIG_2}}
+    ├── [config 1]
+    └── [config 2]
 ```
 
-## File Placement Rules:
+### Key Files (Don't Duplicate!)
 
-| File Type | Goes In | Example |
-|-----------|---------|---------|
-| Components | `{{COMPONENTS_PATH}}` | `Button.jsx` |
-| Pages/Views | `{{PAGES_PATH}}` | `Dashboard.jsx` |
-| API/Routes | `{{API_PATH}}` | `users.py` |
-| Utilities | `{{UTILS_PATH}}` | `helpers.js` |
-| Styles | `{{STYLES_PATH}}` | `main.css` |
-| Tests | `{{TESTS_PATH}}` | `test_api.py` |
+| File | Purpose | Warning |
+|------|---------|---------|
+| [PATH] | [Purpose] | ⚠️ [What breaks if changed] |
+| [PATH] | [Purpose] | ⚠️ [What breaks if changed] |
+| [PATH] | [Purpose] | ⚠️ [What breaks if changed] |
 
-## ❌ NEVER:
-- Create files in project root (except configs)
-- Create new folders without user approval
-- Create duplicate functionality
-- Leave orphan files
+---
 
-## ✅ BEFORE Creating ANY File:
+## 🔗 CONNECTIONS MAP
+
+> How parts talk to each other:
 
 ```
-□ Checked file tree - doesn't exist?
-□ Checked similar files - no duplicates?
-□ Correct location per table above?
-□ Will update file tree after creation?
+[Frontend] (:[PORT])
+    ↓ calls
+[Backend API] (:[PORT]/api/...)
+    ↓ queries
+[Database] ([TYPE])
+```
+
+### API Endpoints
+
+| Endpoint | Method | Used By |
+|----------|--------|---------|
+| [/api/...] | [GET/POST] | [Component/File] |
+| [/api/...] | [GET/POST] | [Component/File] |
+
+---
+
+## 🔄 CHANGE MANAGEMENT
+
+### Change Classification (Your Responsibility)
+
+When the user asks for ANY change, you MUST:
+
+1. **Classify** the request into one of three types
+2. **State** the classification explicitly in your reply
+3. **Apply** the rules for that type
+
+> The user does NOT need to know these classifications.
+> It's YOUR job to infer and apply the correct rules.
+
+### Classification Types
+
+#### 1️⃣ PURE_UI_STYLE
+
+**What it is:**
+- Visual-only changes: colors, spacing, font sizes, alignment, labels, button text, headings
+- No new logic, no new state, no component structure changes
+
+**Rules:**
+```
+✅ Only touch CSS/styling and JSX/HTML text
+❌ Do NOT create or delete files
+❌ Do NOT rename components
+❌ Do NOT change function signatures or add/remove hooks
+❌ Do NOT change routing, data flow, or API calls
+```
+
+#### 2️⃣ UI_BEHAVIOUR_TWEAK
+
+**What it is:**
+- Same screen, same components
+- Change WHEN or HOW something happens (button enabled/disabled, which message appears, default tab, etc.)
+
+**Rules:**
+```
+✅ Edit existing components/functions
+✅ Reuse existing patterns and utilities
+❌ Do NOT add new pages/routes
+❌ Do NOT refactor project structure
+❌ Limit changes to MINIMUM files needed
+```
+
+#### 3️⃣ NEW_FEATURE_FLOW
+
+**What it is:**
+- New screen, new route, or new user flow
+- New domain concept or major capability
+
+**Rules:**
+```
+BEFORE coding:
+  □ Update this memory file with new flow description
+  □ Confirm design with user in 3-5 bullet points
+
+DURING implementation:
+  □ Reuse existing architecture and conventions
+  □ Don't change stable parts without user approval
+
+AFTER implementation:
+  □ List new files/routes/components added
+  □ Update FILE MAP and RECENT CHANGES
+```
+
+### Quick Examples
+
+| User Request | Classification |
+|--------------|----------------|
+| "اجعل الزر أكبر" | PURE_UI_STYLE |
+| "غير النص لعربي" | PURE_UI_STYLE |
+| "Change button color to blue" | PURE_UI_STYLE |
+| "الزر يشتغل بس لما يكون في input" | UI_BEHAVIOUR_TWEAK |
+| "أضف رسالة نجاح بعد الحفظ" | UI_BEHAVIOUR_TWEAK |
+| "Show error toast on failure" | UI_BEHAVIOUR_TWEAK |
+| "أضف صفحة Settings جديدة" | NEW_FEATURE_FLOW |
+| "أضف نظام إشعارات" | NEW_FEATURE_FLOW |
+| "Add user authentication" | NEW_FEATURE_FLOW |
+
+### Before You Touch Code (MANDATORY)
+
+For ANY change, you MUST:
+
+```
+1. RESTATE the change in 1-2 lines
+
+2. SHOW:
+   Classification: [PURE_UI_STYLE / UI_BEHAVIOUR_TWEAK / NEW_FEATURE_FLOW]
+   Files to modify: [list paths]
+   Will NOT change: [explicit boundaries]
+
+3. WAIT for user to say "ok" before proceeding
+
+4. AFTER changes:
+   - Explain what changed (files + behaviour)
+   - Add entry to RECENT CHANGES
+```
+
+**Example Response:**
+
+```
+You want to change the submit button color from gray to blue.
+
+Classification: PURE_UI_STYLE
+Files to modify: src/components/SubmitButton.jsx
+Will NOT change: button logic, form validation, any other files
+
+Can I proceed?
 ```
 
 ---
 
-# 📊 SECTION 3: PROJECT STATUS
+## 📝 RECENT CHANGES
 
-## Last Synced: {{TIMESTAMP}}
+> **AFTER every change:** Add a row here!
 
-### Current Issues:
-```
-{{CURRENT_ISSUES}}
-```
-> When you fix an issue, REMOVE it from here and add to Recent Changes
-
-### Recent Changes:
-| Date | Change | Files Affected |
-|------|--------|----------------|
-| {{DATE}} | {{CHANGE}} | {{FILES}} |
+| When | What Changed | Files Affected |
+|------|--------------|----------------|
+| [DATE TIME] | [Description] | [file1, file2] |
+| [DATE TIME] | [Description] | [file1, file2] |
 
 ---
 
-# 🔧 SECTION 4: DEBUG INTEGRATION
+## ⚠️ KNOWN ISSUES
 
-## Report Location: `~/Desktop/guardian-reports/`
+> Current bugs or limitations:
 
-### BEFORE fixing any bug:
-```bash
-# Read this file FIRST:
-cat ~/Desktop/guardian-reports/AGENT_SUMMARY.md
+```
+1. [Issue description]
+   → Related to: [file/feature]
+   → Don't touch: [what to avoid]
+
+2. [Issue description]
+   → Related to: [file/feature]
 ```
 
-### If reports exist, they contain:
-- Actual errors (not guesses)
-- Failed network requests
-- System state at time of failure
-
-### If reports don't exist:
-- Ask user to run diagnostics first
-- Don't guess the problem
+> **When you fix an issue:** Remove it from here, add to RECENT CHANGES.
 
 ---
 
-# 📝 SECTION 5: DECISION LOG
+## 🚫 THINGS THAT BREAK EASILY
 
-> Decisions marked 🔒 are PERMANENT. Never suggest changing them.
-
-| Date | Decision | Reason | Status |
-|------|----------|--------|--------|
-| {{DATE}} | {{DECISION}} | {{REASON}} | 🔒 Locked |
-
----
-
-# 🚀 SECTION 6: COMMANDS
-
-## How to Run:
-```bash
-{{RUN_COMMAND}}
 ```
-
-## How to Build:
-```bash
-{{BUILD_COMMAND}}
-```
-
-## How to Test:
-```bash
-{{TEST_COMMAND}}
+❌ [Action] → breaks [Feature]
+❌ [Action] → breaks [Feature]
+❌ [Action] → breaks [Feature]
 ```
 
 ---
 
-# ✅ SECTION 7: RESPONSE CHECKLIST
+## 🔍 BEFORE ANY ACTION
 
-## Before EVERY response, verify:
-
-### If creating/modifying files:
+### Creating a file?
 ```
-□ Checked Section 2 (File Tree)?
-□ File goes in correct location?
-□ Not duplicating existing file?
-□ Will update file tree after?
+□ Checked FILE MAP - similar file exists?
+□ Checked Key Files - am I duplicating?
+□ Know the correct folder?
+□ Will update FILE MAP after?
 ```
 
-### If suggesting solutions:
+### Modifying code?
 ```
-□ Using only locked technologies (Section 1)?
-□ Not suggesting forbidden alternatives?
-□ Read debug reports if bug-related?
-```
-
-### If saying "Done" or "Fixed":
-```
-□ Actually tested/verified?
-□ No console errors?
-□ Updated Current Issues?
-□ Added to Recent Changes?
+□ Checked CONNECTIONS MAP - what depends on this?
+□ Checked Key Files - is this critical?
+□ Will this change a port/path/config?
+□ Will update RUNNING NOW if needed?
 ```
 
-## ⚠️ HONESTY RULE:
-If you're not 100% sure something works, say:
-> "I made changes to X. Please test by doing Y to confirm it works."
-
-Never say "Done!" without verification.
-
----
-
-# 🔄 SECTION 8: SELF-UPDATE PROTOCOL
-
-## After ANY structural change, update this file:
-
-### New file created:
-```markdown
-1. Add to File Tree (Section 2)
-2. Add to Recent Changes (Section 3)
+### Starting a server?
+```
+□ Checked RUNNING NOW - already running?
+□ Using exact command from HOW TO RUN?
+□ Will update RUNNING NOW after?
 ```
 
-### File deleted:
-```markdown
-1. Remove from File Tree (Section 2)  
-2. Add to Recent Changes (Section 3)
+### Fixing a bug?
 ```
-
-### Bug fixed:
-```markdown
-1. Remove from Current Issues (Section 3)
-2. Add to Recent Changes (Section 3)
-```
-
-### New decision made:
-```markdown
-1. Add to Decision Log (Section 5)
-2. If about tech → Add to Section 1
+□ Checked KNOWN ISSUES first?
+□ Checked RECENT CHANGES - was it working before?
+□ Will update KNOWN ISSUES after fix?
 ```
 
 ---
 
-# 📢 FINAL REMINDER
+## 💬 WHEN UNSURE
 
-You are an AI assistant with memory limitations. This file IS your memory for this project.
+Instead of guessing, say:
 
-**Every time you respond:**
-1. Relevant sections = Your context
-2. File tree = Your map
-3. Decision log = Your history
-4. This file = Your single source of truth
+> "I see [X] in the project memory. Before I proceed:
+> - Is [server] currently running on port [PORT]?
+> - Should I modify [existing file] or create new?
+> - This might affect [connection] - should I continue?"
 
-**The user trusts you to:**
-- Follow these rules consistently
-- Keep this file updated
-- Be honest about what works and what doesn't
+**Never assume. Always verify with the user.**
 
 ---
 
-*🛡️ Guardian Protocol Active | Last Updated: {{TIMESTAMP}}*
+## ✅ AFTER EVERY RESPONSE
+
+```
+□ Created a file?      → Update FILE MAP
+□ Changed structure?   → Update FILE MAP
+□ Started a server?    → Update RUNNING NOW
+□ Stopped a server?    → Update RUNNING NOW
+□ Changed port/path?   → Update CONNECTIONS MAP
+□ Fixed a bug?         → Update KNOWN ISSUES
+□ Did anything?        → Add to RECENT CHANGES
+```
+
+---
+
+*🛡️ Guardian v3 - Your Memory, Your Map, Your Safety Net*
+*Last synced: [TIMESTAMP]*
