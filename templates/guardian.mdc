@@ -1,0 +1,259 @@
+---
+description: Project Guardian - Your AI Agent's Memory & Guide
+globs: **/*
+alwaysApply: true
+---
+
+# 🛡️ PROJECT GUARDIAN
+## {{PROJECT_NAME}} - Configuration File
+
+> ⚠️ **AGENT:** Read this file completely before any work!
+> This is the single source of truth for this project.
+
+---
+
+# 📋 PART 1: LOCKED DECISIONS
+
+## 🔒 Technology Stack (DO NOT SUGGEST ALTERNATIVES)
+
+```yaml
+Frontend: 
+  Framework: {{FRONTEND_FRAMEWORK}}
+  UI Library: {{UI_LIBRARY}}
+  Styling: {{STYLING}}
+  State Management: {{STATE_MANAGEMENT}}
+
+Backend:
+  Framework: {{BACKEND_FRAMEWORK}}
+  Database: {{DATABASE}}
+  Authentication: {{AUTH}}
+  
+Additional:
+  Language: {{LANGUAGE}}
+  Package Manager: {{PACKAGE_MANAGER}}
+```
+
+## 📁 Project Structure
+
+```
+{{PROJECT_ROOT}}/
+├── {{FOLDER_1}}/
+│   └── ...
+├── {{FOLDER_2}}/
+│   └── ...
+└── {{FOLDER_3}}/
+    └── ...
+```
+
+## ⛔ Absolute Rules
+
+1. **Never suggest changing locked technologies**
+2. **Never create files outside defined structure**
+3. **Never delete without confirmation**
+4. **Always read diagnostic reports before fixing**
+5. **Always update this file after changes**
+
+---
+
+# 📊 PART 2: PROJECT STATUS
+
+## ⏱️ Last Updated: {{TIMESTAMP}}
+
+## 📈 Stats
+- Active Files: {{FILE_COUNT}}
+- Entry Point: `{{ENTRY_POINT}}`
+- Server Status: {{SERVER_STATUS}}
+
+## ❌ Current Issues
+<!-- Updated by Debug Toolkit -->
+```
+[Will be filled from diagnostic reports]
+```
+
+## ✅ Recent Changes
+| Date | File | Change |
+|------|------|--------|
+| | | |
+
+---
+
+# 🗂️ PART 3: FILE TREE
+
+## Active Files
+```
+[List your important files here]
+```
+
+---
+
+# 📝 PART 4: DECISION LOG
+
+| Date | Decision | Reason | Locked? |
+|------|----------|--------|---------|
+| {{DATE}} | {{DECISION}} | {{REASON}} | 🔒 Yes |
+
+---
+
+# 🔧 PART 5: DEBUG TOOLKIT INTEGRATION
+
+## 📍 Report Location
+
+> **macOS:** Reports save to `~/Desktop/guardian-reports/`
+> **Windows:** Reports save to `Documents/guardian-reports/`
+
+```
+~/Desktop/guardian-reports/
+├── latest-diagnostic.json    ← Latest diagnostic report
+├── AGENT_SUMMARY.md          ← Human-readable summary
+├── error-log.json            ← Error history
+└── network-log.json          ← API request log
+```
+
+## 🔄 How to Use Reports
+
+### Before Any Fix:
+```bash
+cat ~/Desktop/guardian-reports/latest-diagnostic.json
+```
+
+### Report Structure:
+```json
+{
+  "timestamp": "ISO-8601",
+  "status": "error|warning|ok",
+  "summary": "Description",
+  "errors": [
+    {
+      "type": "network|ui|api|system",
+      "message": "Error description",
+      "file": "Affected file",
+      "suggestion": "Suggested fix"
+    }
+  ]
+}
+```
+
+## 🎯 Fix Workflow
+
+1. **Read report first**
+2. **Identify error type**
+3. **Apply suggested fix**
+4. **Verify fix worked**
+5. **Update this file**
+
+---
+
+# 📚 PART 6: DOCUMENTATION
+
+## 🎯 Project Overview
+{{PROJECT_DESCRIPTION}}
+
+## 🚀 How to Run
+
+```bash
+# The only approved method:
+{{RUN_COMMAND_1}}
+{{RUN_COMMAND_2}}
+```
+
+> ⚠️ **Do not use any other method!**
+
+## 📦 Requirements
+```
+{{REQUIREMENTS}}
+```
+
+---
+
+# ✅ PART 7: AGENT CHECKLIST
+
+## Before Any Work:
+- [ ] Read this file completely?
+- [ ] Read diagnostic report from ~/Desktop/guardian-reports/?
+- [ ] File exists in defined structure?
+- [ ] Not suggesting locked technology change?
+
+## After Any Change:
+- [ ] Application still works?
+- [ ] Updated "Recent Changes" section?
+- [ ] Updated file tree if added/removed?
+- [ ] Updated "Current Issues" if fixed?
+
+## When Adding New File:
+- [ ] Confirmed it doesn't already exist?
+- [ ] Placed in correct folder per structure?
+- [ ] Added to file tree?
+- [ ] Added description?
+
+---
+
+# 🔄 PART 8: SELF-UPDATE INSTRUCTIONS
+
+## After Each Successful Change:
+```markdown
+1. Update {{TIMESTAMP}} with current time
+2. Add row to "Recent Changes"
+3. If added file → add to tree
+4. If deleted file → remove from tree
+```
+
+## After Fixing Issue:
+```markdown
+1. Remove from "Current Issues"
+2. Add "✅ Fixed: [issue]" to changes
+```
+
+## After Important Decision:
+```markdown
+1. Add to "Decision Log"
+2. Mark if locked or not
+```
+
+---
+
+# 🆘 PART 9: TROUBLESHOOTING
+
+## Common Issues:
+
+### ❌ "App won't start"
+```
+1. Check server running: {{SERVER_CHECK}}
+2. Check port: {{PORT}}
+3. Run: {{RUN_COMMAND}}
+```
+
+### ❌ "Can't save files"
+```
+macOS permissions issue:
+- Reports go to: ~/Desktop/guardian-reports/
+- Don't try to save in project folder directly
+```
+
+### ❌ "Server connection failed"
+```
+1. Verify server is running
+2. Check API URL in config
+3. Review network log: ~/Desktop/guardian-reports/network-log.json
+```
+
+---
+
+# 📢 MESSAGE TO AGENT
+
+You are working on **{{PROJECT_NAME}}**. This file contains everything you need.
+
+**Golden Rules:**
+1. 🔒 **Don't change technologies** - They're locked
+2. 📖 **Read reports first** - Before any fix
+3. 📝 **Update this file** - After every change
+4. ❓ **Ask before deleting** - Always
+5. 🎯 **One file = One place** - No duplicates
+
+**Remember:**
+> The user doesn't read code. They rely on you and Debug Toolkit.
+> Be honest - if it didn't work, say it didn't work.
+
+---
+
+*🛡️ Project Guardian - "One file to rule them all"*
+*A Product by Imperfect Success | github.com/project-guardian/core*

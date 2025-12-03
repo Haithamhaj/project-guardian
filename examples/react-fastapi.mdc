@@ -1,0 +1,231 @@
+---
+description: Project Guardian - React + FastAPI Example
+globs: **/*
+alwaysApply: true
+---
+
+# 🛡️ PROJECT GUARDIAN
+## My Awesome App - Configuration File
+
+> ⚠️ **للوكيل:** اقرأ هذا الملف كاملاً قبل أي عمل!
+
+---
+
+# 📋 PART 1: LOCKED DECISIONS
+
+## 🔒 Technology Stack (DO NOT SUGGEST ALTERNATIVES)
+
+```yaml
+Frontend: 
+  Framework: React 18
+  UI Library: Shadcn/ui
+  Styling: Tailwind CSS
+  State Management: Zustand
+  Build Tool: Vite
+
+Backend:
+  Framework: FastAPI
+  Database: PostgreSQL
+  ORM: SQLAlchemy
+  Authentication: JWT
+  
+Additional:
+  Language: TypeScript (frontend), Python 3.11 (backend)
+  Package Manager: pnpm (frontend), pip (backend)
+```
+
+## 📁 Project Structure
+
+```
+my-awesome-app/
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/           # Page components
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── services/        # API calls
+│   │   ├── stores/          # Zustand stores
+│   │   └── lib/             # Utilities
+│   ├── public/
+│   └── package.json
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/             # API routes
+│   │   ├── models/          # SQLAlchemy models
+│   │   ├── schemas/         # Pydantic schemas
+│   │   └── services/        # Business logic
+│   ├── main.py
+│   └── requirements.txt
+│
+└── docker-compose.yml
+```
+
+## ⛔ Absolute Rules
+
+1. **Never suggest Vue, Angular, or other frontend frameworks**
+2. **Never suggest Django, Flask, or Express**
+3. **Never create files outside defined structure**
+4. **Always use TypeScript for frontend code**
+5. **Always use Pydantic for API validation**
+
+---
+
+# 📊 PART 2: PROJECT STATUS
+
+## ⏱️ Last Updated: 2024-12-03T10:00:00Z
+
+## 📈 Stats
+- Frontend Files: 45
+- Backend Files: 23
+- Entry Point: See "How to Run"
+- Server: http://localhost:8000
+- Frontend: http://localhost:5173
+
+## ❌ Current Issues
+```
+None currently
+```
+
+## ✅ Recent Changes
+| Date | File | Change |
+|------|------|--------|
+| 2024-12-03 | frontend/src/pages/Dashboard.tsx | Added analytics widget |
+| 2024-12-02 | backend/app/api/users.py | Fixed auth middleware |
+
+---
+
+# 🗂️ PART 3: FILE TREE
+
+## Frontend
+```
+frontend/src/
+├── App.tsx                    ← Main app component
+├── main.tsx                   ← Entry point
+├── components/
+│   ├── ui/                    ← Shadcn components
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── Footer.tsx
+│   └── common/
+│       ├── Button.tsx
+│       └── Input.tsx
+├── pages/
+│   ├── Dashboard.tsx
+│   ├── Settings.tsx
+│   └── Profile.tsx
+├── hooks/
+│   ├── useAuth.ts
+│   └── useApi.ts
+├── services/
+│   └── api.ts                 ← Axios instance
+└── stores/
+    ├── authStore.ts
+    └── uiStore.ts
+```
+
+## Backend
+```
+backend/
+├── main.py                    ← FastAPI entry
+├── app/
+│   ├── api/
+│   │   ├── auth.py
+│   │   ├── users.py
+│   │   └── items.py
+│   ├── models/
+│   │   ├── user.py
+│   │   └── item.py
+│   ├── schemas/
+│   │   ├── user.py
+│   │   └── item.py
+│   └── services/
+│       ├── auth_service.py
+│       └── email_service.py
+└── requirements.txt
+```
+
+---
+
+# 📝 PART 4: DECISION LOG
+
+| Date | Decision | Reason | Locked? |
+|------|----------|--------|---------|
+| 2024-01-15 | React 18 | Team expertise + ecosystem | 🔒 Yes |
+| 2024-01-15 | FastAPI | Async support + auto docs | 🔒 Yes |
+| 2024-01-20 | Zustand over Redux | Simpler API | 🔒 Yes |
+| 2024-02-01 | PostgreSQL | Production ready | 🔒 Yes |
+| 2024-02-10 | Shadcn/ui | Customizable + accessible | 🔒 Yes |
+
+---
+
+# 🔧 PART 5: DEBUG TOOLKIT
+
+## 📍 Report Location: `~/Desktop/guardian-reports/`
+
+## Commands for Agent:
+```bash
+# Read latest diagnostic
+cat ~/Desktop/guardian-reports/latest-diagnostic.json
+
+# Read summary
+cat ~/Desktop/guardian-reports/AGENT_SUMMARY.md
+```
+
+---
+
+# 📚 PART 6: HOW TO RUN
+
+## Development
+
+```bash
+# Terminal 1: Backend
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+
+# Terminal 2: Frontend
+cd frontend
+pnpm install
+pnpm dev
+```
+
+## Production
+
+```bash
+docker-compose up --build
+```
+
+## Environment Variables
+
+```bash
+# backend/.env
+DATABASE_URL=postgresql://user:pass@localhost:5432/myapp
+JWT_SECRET=your-secret-key
+CORS_ORIGINS=http://localhost:5173
+
+# frontend/.env
+VITE_API_URL=http://localhost:8000
+```
+
+---
+
+# ✅ PART 7: AGENT CHECKLIST
+
+## Before Any Work:
+- [ ] Read this file?
+- [ ] Read diagnostic report?
+- [ ] Know which folder (frontend/backend)?
+- [ ] Using correct language (TS/Python)?
+
+## After Any Change:
+- [ ] Type checking passes? (`pnpm tsc` / `mypy`)
+- [ ] Updated this file?
+- [ ] Tested the feature?
+
+---
+
+*🛡️ Project Guardian - React + FastAPI Example*
