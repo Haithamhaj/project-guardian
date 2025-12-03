@@ -54,7 +54,7 @@ Project Guardian gives your AI agent:
 Just tell your AI agent:
 
 ```
-Install Project Guardian from: github.com/YOUR_USERNAME/project-guardian
+Install Project Guardian from: github.com/Haithamhaj/project-guardian
 ```
 
 **That's it.** The agent reads `AGENT_INSTALL.md` and does everything automatically.
@@ -65,7 +65,7 @@ Install Project Guardian from: github.com/YOUR_USERNAME/project-guardian
 
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/project-guardian.git
+git clone https://github.com/Haithamhaj/project-guardian.git
 
 # 2. Copy to your project
 cp -r project-guardian/templates/* /your/project/
@@ -111,7 +111,7 @@ project-guardian/
 │   │            🛡️ Project Guardian                  │   │
 │   │                                                 │   │
 │   │   guardian.mdc:                                 │   │
-│   │   • Tech stack: React + FastAPI ← locked        │   │
+│   │   • Tech stack: [YOUR STACK] ← locked           │   │
 │   │   • File structure: defined                     │   │
 │   │   • Past decisions: remembered                  │   │
 │   │                                                 │   │
@@ -129,18 +129,20 @@ project-guardian/
 
 ## 🔧 Customization
 
-Edit `guardian.mdc` to match your project:
+The agent will ask you about your stack and customize `guardian.mdc` automatically:
 
 ```yaml
-# Lock your tech stack
+# Lock your tech stack (examples - agent fills based on YOUR project)
 Frontend: 
-  Framework: React        # Your choice
-  UI: Tailwind            # Your choice
+  Framework: [React/Vue/Angular/Next.js/...]
+  UI: [Tailwind/Bootstrap/MUI/Chakra/...]
 
 Backend:
-  Framework: FastAPI      # Your choice
-  Database: PostgreSQL    # Your choice
+  Framework: [FastAPI/Express/Django/Rails/...]
+  Database: [PostgreSQL/MySQL/MongoDB/SQLite/...]
 ```
+
+> 💡 **You don't edit this manually!** Just tell the agent what you use and it configures everything.
 
 See [customization guide](docs/customization.md) for detailed instructions.
 
@@ -161,7 +163,7 @@ Add to guardian.mdc:
 ```markdown
 | Date | Decision | Reason | Locked? |
 |------|----------|--------|---------|
-| 2024-12 | Use TypeScript | Type safety | 🔒 Yes |
+| 2024-12 | Use [Your Choice] | [Your Reason] | 🔒 Yes |
 ```
 
 ### 3. Keep File Tree Updated
