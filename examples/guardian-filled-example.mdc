@@ -42,28 +42,37 @@ alwaysApply: true
 
 ```yaml
 Frontend:
-  Framework: {{FRONTEND}}
-  UI_Library: {{UI_LIB}}
-  Styling: {{STYLING}}
+  Framework: React 18
+  UI_Library: Shadcn/ui
+  Styling: Tailwind CSS
 
 Backend:
-  Framework: {{BACKEND}}
-  Database: {{DATABASE}}
-  Auth: {{AUTH}}
+  Framework: FastAPI
+  Database: SQLite
+  Auth: JWT
 
 Tools:
-  Package_Manager: {{PKG_MANAGER}}
-  Language: {{LANGUAGE}}
+  Package_Manager: npm
+  Language: TypeScript (frontend), Python 3.11 (backend)
 ```
 
 ### ❌ FORBIDDEN (Never suggest these):
 ```
-{{FORBIDDEN_TECH}}
+- Vue, Angular, Svelte (use React)
+- Django, Flask, Express (use FastAPI)
+- MongoDB, PostgreSQL for MVP (use SQLite)
+- Redux (use Zustand or React Context)
+- CSS Modules (use Tailwind)
 ```
 
 ### ✅ APPROVED (Safe to use):
 ```
-{{APPROVED_LIBS}}
+- Any Shadcn/ui component
+- Tailwind utilities
+- Lucide icons
+- Axios or fetch for API
+- React Router
+- Zustand for state
 ```
 
 ---
@@ -77,36 +86,70 @@ Tools:
 ## Current Structure:
 
 ```
-{{PROJECT_ROOT}}/
+my-app/
 │
-├── 📂 {{FOLDER_1}}/          # {{FOLDER_1_DESC}}
-│   ├── {{FILE_1}}
-│   ├── {{FILE_2}}
-│   └── ...
+├── 📂 src/                      # Frontend source code
+│   ├── 📂 components/           # Reusable UI components
+│   │   ├── ui/                  # Shadcn components
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   └── card.tsx
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── ChatMessage.tsx
+│   │
+│   ├── 📂 pages/                # Page components
+│   │   ├── Home.tsx
+│   │   ├── Dashboard.tsx
+│   │   └── Settings.tsx
+│   │
+│   ├── 📂 hooks/                # Custom React hooks
+│   │   ├── useAuth.ts
+│   │   └── useApi.ts
+│   │
+│   ├── 📂 lib/                  # Utilities & helpers
+│   │   ├── api.ts               # API client
+│   │   ├── utils.ts             # General utilities
+│   │   └── cn.ts                # Tailwind merge utility
+│   │
+│   ├── App.tsx                  # Main app component
+│   ├── main.tsx                 # Entry point
+│   └── index.css                # Global styles + Tailwind
 │
-├── 📂 {{FOLDER_2}}/          # {{FOLDER_2_DESC}}
-│   ├── {{FILE_3}}
-│   └── ...
+├── 📂 api/                      # Backend source code
+│   ├── main.py                  # FastAPI entry point
+│   ├── 📂 routes/
+│   │   ├── auth.py
+│   │   ├── chat.py
+│   │   └── users.py
+│   ├── 📂 models/
+│   │   └── schemas.py
+│   └── 📂 services/
+│       └── ai_service.py
 │
-├── 📂 {{FOLDER_3}}/          # {{FOLDER_3_DESC}}
-│   └── ...
+├── 📂 public/                   # Static assets
+│   └── favicon.ico
 │
-└── 📄 Config files
+└── 📄 Configuration
     ├── package.json
-    ├── {{CONFIG_1}}
-    └── {{CONFIG_2}}
+    ├── tsconfig.json
+    ├── tailwind.config.js
+    ├── vite.config.ts
+    └── requirements.txt
 ```
 
 ## File Placement Rules:
 
 | File Type | Goes In | Example |
 |-----------|---------|---------|
-| Components | `{{COMPONENTS_PATH}}` | `Button.jsx` |
-| Pages/Views | `{{PAGES_PATH}}` | `Dashboard.jsx` |
-| API/Routes | `{{API_PATH}}` | `users.py` |
-| Utilities | `{{UTILS_PATH}}` | `helpers.js` |
-| Styles | `{{STYLES_PATH}}` | `main.css` |
-| Tests | `{{TESTS_PATH}}` | `test_api.py` |
+| React Components | `src/components/` | `Button.tsx` |
+| Shadcn UI | `src/components/ui/` | `card.tsx` |
+| Pages | `src/pages/` | `Dashboard.tsx` |
+| Custom Hooks | `src/hooks/` | `useAuth.ts` |
+| Utilities | `src/lib/` | `utils.ts` |
+| API Routes | `api/routes/` | `users.py` |
+| Pydantic Models | `api/models/` | `schemas.py` |
+| Backend Services | `api/services/` | `ai_service.py` |
 
 ## ❌ NEVER:
 - Create files in project root (except configs)
@@ -127,18 +170,21 @@ Tools:
 
 # 📊 SECTION 3: PROJECT STATUS
 
-## Last Synced: {{TIMESTAMP}}
+## Last Synced: 2024-12-03T12:30:00Z
 
 ### Current Issues:
 ```
-{{CURRENT_ISSUES}}
+1. WebSocket disconnects after 5 minutes idle
+2. Dark mode toggle not persisting
 ```
 > When you fix an issue, REMOVE it from here and add to Recent Changes
 
 ### Recent Changes:
 | Date | Change | Files Affected |
 |------|--------|----------------|
-| {{DATE}} | {{CHANGE}} | {{FILES}} |
+| 2024-12-03 | Added chat history feature | `src/pages/Dashboard.tsx`, `api/routes/chat.py` |
+| 2024-12-02 | Fixed auth token refresh | `src/hooks/useAuth.ts` |
+| 2024-12-01 | Initial project setup | Multiple files |
 
 ---
 
@@ -169,26 +215,49 @@ cat ~/Desktop/guardian-reports/AGENT_SUMMARY.md
 
 | Date | Decision | Reason | Status |
 |------|----------|--------|--------|
-| {{DATE}} | {{DECISION}} | {{REASON}} | 🔒 Locked |
+| 2024-12-01 | Use React 18 | Team expertise | 🔒 Locked |
+| 2024-12-01 | Use FastAPI | Async + auto docs | 🔒 Locked |
+| 2024-12-01 | Use SQLite for MVP | Simplicity, migrate later | 🔒 Locked |
+| 2024-12-01 | Use Tailwind | Rapid prototyping | 🔒 Locked |
+| 2024-12-02 | Use Shadcn/ui | Accessible + customizable | 🔒 Locked |
+| 2024-12-02 | JWT for auth | Stateless, scalable | 🔒 Locked |
 
 ---
 
 # 🚀 SECTION 6: COMMANDS
 
-## How to Run:
+## How to Run (Development):
 ```bash
-{{RUN_COMMAND}}
+# Terminal 1 - Backend:
+cd api
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+
+# Terminal 2 - Frontend:
+npm install
+npm run dev
 ```
 
 ## How to Build:
 ```bash
-{{BUILD_COMMAND}}
+npm run build
 ```
 
 ## How to Test:
 ```bash
-{{TEST_COMMAND}}
+# Frontend
+npm test
+
+# Backend  
+pytest
 ```
+
+## Important URLs:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
 ---
 
@@ -274,4 +343,4 @@ You are an AI assistant with memory limitations. This file IS your memory for th
 
 ---
 
-*🛡️ Guardian Protocol Active | Last Updated: {{TIMESTAMP}}*
+*🛡️ Guardian Protocol Active | Last Updated: 2024-12-03T12:30:00Z*
