@@ -1,16 +1,14 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="Imperfect Success" width="300"/>
-
 # 🛡️ Project Guardian
 
-### Make Your AI Agent Actually Remember
+### Your AI Agent's Memory System
 
-**Stop repeating yourself. Start shipping faster.**
+**It discovers your project. It remembers everything. You never repeat yourself.**
 
 *No Medals. Just Real Progress.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://imperfectsuccess.com)
 
@@ -22,28 +20,68 @@
 
 You're building with AI agents (Cursor, Windsurf, Copilot...) and this keeps happening:
 
-| What You Say | What Happens |
-|--------------|--------------|
-| "We decided to use React" | Agent suggests Vue next session |
-| "The server runs on port 8000" | Agent tries port 3000 |
-| "Don't create new files there" | Agent creates files there |
-| "It's working now" | It's not actually working |
-| "Remember we discussed..." | Agent remembers nothing |
+```
+You: "Change the button color"
+Agent: Creates 3 new files, refactors the component structure, adds a theme system
 
-**You spend more time re-explaining than building.**
+You: "Fix the login bug"  
+Agent: Starts a new server on port 3000 (yours runs on 8765)
+
+You: "Add a toast message"
+Agent: Forgets your tech stack, suggests Vue (you use React)
+
+You: "Continue from yesterday"
+Agent: "I don't have access to previous conversations"
+```
+
+**Result:** Hours wasted re-explaining. Code breaks. Frustration builds.
 
 ---
 
-## ✨ The Solution
+## 💡 The Solution
 
-Project Guardian gives your AI agent:
+**Guardian is a memory system for your AI agent.**
 
-| Feature | What It Does |
-|---------|--------------|
-| **Persistent Memory** | Locked decisions that never change |
-| **Project Structure** | Always knows where files go |
-| **Debug Vision** | Reads diagnostic reports, finds real problems |
-| **Self-Updating Docs** | Documentation that stays current |
+```
+It does NOT force rules.
+It does NOT impose structure.
+It does NOT require configuration.
+
+It DISCOVERS your project automatically.
+It REMEMBERS everything for the agent.
+It PROTECTS your code from agent mistakes.
+```
+
+---
+
+## 🧠 How It Works
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  1. DISCOVERY (Automatic)                               │
+│     Agent scans your project:                           │
+│     • Tech stack from package.json, requirements.txt    │
+│     • File structure from actual folders                │
+│     • Run commands from scripts                         │
+│     • Connections between frontend ↔ backend            │
+│                                                         │
+│  2. MEMORY (guardian.mdc)                               │
+│     Everything saved in one file:                       │
+│     • How to run the project                            │
+│     • What servers are running (ports)                  │
+│     • Where files should go                             │
+│     • What breaks easily                                │
+│                                                         │
+│  3. PROTECTION (Every Request)                          │
+│     Before ANY change, agent must:                      │
+│     • Read the memory file                              │
+│     • Classify the change type                          │
+│     • Show what it will/won't touch                     │
+│     • Wait for your "ok"                                │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -57,7 +95,13 @@ Just tell your AI agent:
 Install Project Guardian from: github.com/Haithamhaj/project-guardian
 ```
 
-**That's it.** The agent reads `AGENT_INSTALL.md` and does everything automatically.
+**That's it.** The agent:
+1. Reads `AGENT_INSTALL.md`
+2. Scans your project automatically
+3. Creates a memory file with everything it discovered
+4. Asks you to confirm
+
+**You answer 1-2 questions max.** Everything else is auto-detected.
 
 ---
 
@@ -67,15 +111,22 @@ Install Project Guardian from: github.com/Haithamhaj/project-guardian
 # 1. Clone
 git clone https://github.com/Haithamhaj/project-guardian.git
 
-# 2. Copy to your project
-cp -r project-guardian/templates/* /your/project/
+# 2. Copy template to your project
+cp project-guardian/templates/guardian.mdc /your/project/
 
-# 3. For Cursor: move the rules file
-mkdir -p /your/project/.cursor/rules
-mv /your/project/guardian.mdc /your/project/.cursor/rules/
+# 3. Move to correct location based on your IDE:
 
-# 4. Create reports folder (important for macOS)
-mkdir -p ~/Desktop/guardian-reports
+# Cursor:
+mkdir -p .cursor/rules && mv guardian.mdc .cursor/rules/
+
+# Windsurf:
+mkdir -p .windsurf/rules && mv guardian.mdc .windsurf/rules/guardian.md
+
+# VS Code + Copilot:
+mkdir -p .github && mv guardian.mdc .github/copilot-instructions.md
+
+# Claude Code:
+mv guardian.mdc CLAUDE.md
 ```
 
 ---
@@ -84,127 +135,101 @@ mkdir -p ~/Desktop/guardian-reports
 
 ```
 project-guardian/
-├── AGENT_INSTALL.md          # Instructions for AI agents (the magic!)
+├── AGENT_INSTALL.md              # Smart installer for AI agents
 ├── templates/
-│   ├── guardian.mdc          # The brain - rules & memory
-│   └── developer-toolkit/    # Debug tools
-│       ├── diagnostics.js    # System checker
-│       ├── logger.js         # Event logger
-│       ├── networkMonitor.js # API monitor
-│       └── ToolkitView.jsx   # UI component (React)
-├── docs/
-│   └── customization.md      # How to customize
-└── examples/
-    └── react-fastapi.mdc     # Ready-to-use example
+│   ├── guardian.mdc              # Memory template
+│   └── developer-toolkit/        # Debug tools (React)
+│       ├── diagnostics.js
+│       ├── logger.js
+│       ├── networkMonitor.js
+│       └── ToolkitView.jsx
+├── examples/
+│   ├── hva-project-memory.mdc    # Real-world example (filled)
+│   └── react-fastapi.mdc         # React + FastAPI example
+└── docs/
+    └── customization.md
 ```
 
 ---
 
-## 🎯 How It Works
+## 🔄 Change Management
+
+Guardian classifies every change before executing:
+
+| Type | What It Is | Agent Rules |
+|------|------------|-------------|
+| **PURE_UI_STYLE** | Colors, spacing, text | Touch CSS only. No new files. |
+| **UI_BEHAVIOUR_TWEAK** | Button logic, toasts | Edit existing files. No new routes. |
+| **NEW_FEATURE_FLOW** | New screens, features | Confirm design first. Update memory after. |
+
+### Example:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│   You: "Fix the login bug"                              │
-│                          ↓                              │
-│   ┌─────────────────────────────────────────────────┐   │
-│   │            🛡️ Project Guardian                  │   │
-│   │                                                 │   │
-│   │   guardian.mdc:                                 │   │
-│   │   • Tech stack: [YOUR STACK] ← locked           │   │
-│   │   • File structure: defined                     │   │
-│   │   • Past decisions: remembered                  │   │
-│   │                                                 │   │
-│   │   diagnostic report:                            │   │
-│   │   • API endpoint failing ← found                │   │
-│   │   • Suggested fix: check auth header            │   │
-│   └─────────────────────────────────────────────────┘   │
-│                          ↓                              │
-│   Agent: *fixes the actual problem*                     │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+You: "Make the button bigger"
+
+Agent Response:
+┌────────────────────────────────────────────────┐
+│ You want to increase the button size.          │
+│                                                │
+│ Classification: PURE_UI_STYLE                  │
+│ Files to modify: src/components/Button.jsx     │
+│ Will NOT change: logic, hooks, other files     │
+│                                                │
+│ Can I proceed?                                 │
+└────────────────────────────────────────────────┘
 ```
+
+**No more surprise refactors. No more broken code.**
 
 ---
 
-## 🔧 Customization
+## 📊 What Guardian Tracks
 
-The agent will ask you about your stack and customize `guardian.mdc` automatically:
-
-```yaml
-# Lock your tech stack (examples - agent fills based on YOUR project)
-Frontend: 
-  Framework: [React/Vue/Angular/Next.js/...]
-  UI: [Tailwind/Bootstrap/MUI/Chakra/...]
-
-Backend:
-  Framework: [FastAPI/Express/Django/Rails/...]
-  Database: [PostgreSQL/MySQL/MongoDB/SQLite/...]
-```
-
-> 💡 **You don't edit this manually!** Just tell the agent what you use and it configures everything.
-
-See [customization guide](docs/customization.md) for detailed instructions.
-
----
-
-## 💡 Pro Tips
-
-### 1. Run Diagnostics Before Asking for Fixes
-
-```
-"Read ~/Desktop/guardian-reports/latest-diagnostic.json 
- and fix what you find"
-```
-
-### 2. Lock Important Decisions
-
-Add to guardian.mdc:
-```markdown
-| Date | Decision | Reason | Locked? |
-|------|----------|--------|---------|
-| 2024-12 | Use [Your Choice] | [Your Reason] | 🔒 Yes |
-```
-
-### 3. Keep File Tree Updated
-
-When the agent adds files, remind it:
-```
-"Update the file tree in guardian.mdc"
-```
+| Section | Purpose |
+|---------|---------|
+| **HOW TO RUN** | Exact commands to start the project |
+| **RUNNING NOW** | Which servers are active on which ports |
+| **TECH STACK** | Detected technologies (don't suggest alternatives) |
+| **FILE MAP** | Where every type of file should go |
+| **CONNECTIONS MAP** | How frontend ↔ backend ↔ database connect |
+| **CHANGE MANAGEMENT** | Rules for different types of changes |
+| **RECENT CHANGES** | What was modified and when |
+| **KNOWN ISSUES** | Current bugs to be aware of |
+| **THINGS THAT BREAK** | Critical files/configs to protect |
 
 ---
 
 ## 🤝 Works With
 
-| IDE/Tool | Status | Config Location |
-|----------|--------|-----------------|
-| Cursor | ✅ Full Support | `.cursor/rules/guardian.mdc` |
-| Windsurf | ✅ Full Support | `.windsurf/rules/guardian.md` |
-| VS Code + Copilot | ✅ Full Support | `.github/copilot-instructions.md` |
-| Claude Code | ✅ Full Support | `CLAUDE.md` |
-| Aider | ✅ Full Support | `CONVENTIONS.md` |
+| IDE/Tool | Config Location |
+|----------|-----------------|
+| Cursor | `.cursor/rules/guardian.mdc` |
+| Windsurf | `.windsurf/rules/guardian.md` |
+| VS Code + Copilot | `.github/copilot-instructions.md` |
+| Claude Code | `CLAUDE.md` |
+| Aider | `CONVENTIONS.md` |
 
 ---
 
-## 📊 Results
+## 📈 Results
 
-Users report:
-
-| Metric | Before | After |
-|--------|--------|-------|
-| Re-explaining context | Every session | Once |
-| Wrong tech suggestions | Frequent | Never |
-| Debug time | Hours | Minutes |
-| Agent "forgetting" | Always | Never |
+| Before Guardian | After Guardian |
+|-----------------|----------------|
+| Re-explain context every session | Explain once, remembered forever |
+| Agent suggests wrong tech | Agent knows your stack |
+| Surprise file creation | Agent asks before creating |
+| Servers on wrong ports | Ports tracked and checked |
+| "It's fixed!" (it's not) | Agent verifies before claiming done |
+| 12 hours debugging agent mistakes | Minutes to implement features |
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] Core guardian.mdc template
+- [x] Memory system (guardian.mdc)
+- [x] Auto-discovery installation
+- [x] Change Management classification
 - [x] Developer Toolkit (diagnostics)
-- [x] Agent auto-installer
 - [ ] Web configurator (guardian.dev)
 - [ ] CLI tool (`npx create-guardian`)
 - [ ] VS Code extension
@@ -229,13 +254,11 @@ MIT - Use it, modify it, ship it.
 
 **🛡️ Project Guardian**
 
-*Stop re-explaining. Start building.*
+*Discover. Remember. Protect.*
 
 [⭐ Star this repo](../../) · [🐛 Report Bug](../../issues) · [💡 Request Feature](../../issues)
 
 ---
-
-<img src="assets/logo.png" alt="Imperfect Success" width="150"/>
 
 **A Product by [Imperfect Success](https://imperfectsuccess.com)**
 
