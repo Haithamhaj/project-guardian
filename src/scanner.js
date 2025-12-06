@@ -111,7 +111,7 @@ class GuardianScanner {
     _detectTechStack() {
         const stack = {};
 
-        // Check package.json for frontend
+        // Check package.json for frontend (Node.js projects)
         const pkgPath = path.join(this.projectPath, 'package.json');
         if (fs.existsSync(pkgPath)) {
             try {
@@ -135,20 +135,66 @@ class GuardianScanner {
             } catch (e) { }
         }
 
-        // Check requirements.txt for backend
+        // Check requirements.txt for Python projects
         const reqPath = path.join(this.projectPath, 'requirements.txt');
         if (fs.existsSync(reqPath)) {
             try {
                 const content = fs.readFileSync(reqPath, 'utf8').toLowerCase();
-                if (content.includes('fastapi')) stack.backend = 'FastAPI';
-                else if (content.includes('django')) stack.backend = 'Django';
-                else if (content.includes('flask')) stack.backend = 'Flask';
+
+                // Detect Python framework - priority order
+                if (content.includes('streamlit')) {
+                    stack.frontend = 'Streamlit';
+                    stack.backend = 'Python';
+                } else if (content.includes('fastapi')) {
+                    stack.backend = 'FastAPI';
+                } else if (content.includes('django')) {
+                    stack.backend = 'Django';
+                } else if (content.includes('flask')) {
+                    stack.backend = 'Flask';
+                } else {
+                    stack.backend = 'Python';
+                }
+
+                // Detect AI/ML libraries
+                if (content.includes('openai')) stack.ai = 'OpenAI';
+                if (content.includes('langchain')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'LangChain';
+                if (content.includes('anthropic')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'Anthropic';
+
+                // Detect database
+                if (content.includes('sqlalchemy')) stack.database = 'SQLAlchemy';
+                else if (content.includes('pymongo')) stack.database = 'MongoDB';
+                else if (content.includes('psycopg')) stack.database = 'PostgreSQL';
+                else if (content.includes('mysql')) stack.database = 'MySQL';
+
             } catch (e) { }
         }
 
-        // Check for database
-        if (this._findFiles(this.projectPath, '.db').length > 0) {
-            stack.database = 'SQLite';
+        // Check for .py files with Streamlit imports (fallback)
+        if (!stack.frontend) {
+            const pyFiles = this._findFiles(this.projectPath, '.py');
+            for (const pyFile of pyFiles.slice(0, 10)) {
+                try {
+                    const content = fs.readFileSync(pyFile, 'utf8');
+                    if (content.includes('import streamlit') || content.includes('from streamlit')) {
+                        stack.frontend = 'Streamlit';
+                        stack.backend = 'Python';
+                        break;
+                    }
+                    if (content.includes('from fastapi') || content.includes('import fastapi')) {
+                        stack.backend = 'FastAPI';
+                        break;
+                    }
+                } catch (e) { }
+            }
+        }
+
+        // Check for database files
+        if (!stack.database) {
+            if (this._findFiles(this.projectPath, '.db').length > 0 ||
+                this._findFiles(this.projectPath, '.sqlite').length > 0 ||
+                this._findFiles(this.projectPath, '.sqlite3').length > 0) {
+                stack.database = 'SQLite';
+            }
         }
 
         this.snapshot.tech_stack = stack;
