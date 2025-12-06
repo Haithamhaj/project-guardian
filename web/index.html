@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛡️ Guardian-H - مولد ذاكرة المشروع</title>
+    <title>🛡️ Guardian-H - AI Agent Memory Generator</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -14,37 +15,52 @@
             --success: #3fb950;
             --warning: #d29922;
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             padding: 2rem;
+            transition: direction 0.3s;
         }
-        
+
+        body.rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        body.ltr {
+            direction: ltr;
+            text-align: left;
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         header {
             text-align: center;
             margin-bottom: 2rem;
         }
-        
+
         h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .subtitle {
             color: #8b949e;
             font-size: 1.1rem;
         }
-        
+
         .badge {
             display: inline-block;
             background: var(--success);
@@ -54,7 +70,34 @@
             font-size: 0.85rem;
             margin-top: 0.5rem;
         }
-        
+
+        .lang-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            background: var(--card);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            color: #000;
+        }
+
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -62,7 +105,7 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-        
+
         .card h2 {
             font-size: 1.25rem;
             margin-bottom: 1rem;
@@ -70,18 +113,20 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .form-group {
             margin-bottom: 1rem;
         }
-        
+
         label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
         }
-        
-        input, textarea, select {
+
+        input,
+        textarea,
+        select {
             width: 100%;
             padding: 0.75rem;
             background: var(--bg);
@@ -90,14 +135,14 @@
             color: var(--text);
             font-size: 1rem;
         }
-        
+
         textarea {
             min-height: 150px;
             font-family: 'Monaco', 'Menlo', monospace;
             font-size: 0.9rem;
         }
-        
-        button {
+
+        button.primary {
             background: var(--accent);
             color: #000;
             border: none;
@@ -109,9 +154,11 @@
             width: 100%;
             transition: opacity 0.2s;
         }
-        
-        button:hover { opacity: 0.9; }
-        
+
+        button.primary:hover {
+            opacity: 0.9;
+        }
+
         .output {
             background: #0d1117;
             border: 1px solid var(--success);
@@ -122,20 +169,22 @@
             white-space: pre-wrap;
             max-height: 400px;
             overflow-y: auto;
+            direction: ltr;
+            text-align: left;
         }
-        
+
         .download-btn {
             background: var(--success);
             margin-top: 1rem;
         }
-        
+
         .methods {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
-        
+
         .method-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -143,12 +192,12 @@
             padding: 1rem;
             text-align: center;
         }
-        
+
         .method-card h3 {
             font-size: 1rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .method-card code {
             display: block;
             background: var(--bg);
@@ -157,16 +206,19 @@
             font-size: 0.75rem;
             margin-top: 0.5rem;
             word-break: break-all;
+            direction: ltr;
         }
-        
-        .hidden { display: none; }
-        
+
+        .hidden {
+            display: none;
+        }
+
         .checkbox-group {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
         }
-        
+
         .checkbox-group label {
             display: flex;
             align-items: center;
@@ -177,24 +229,33 @@
             cursor: pointer;
             font-weight: normal;
         }
-        
+
         .checkbox-group input {
             width: auto;
         }
     </style>
 </head>
-<body>
+
+<body class="ltr">
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('en')">English</button>
+        <button class="lang-btn" onclick="setLang('ar')">العربية</button>
+    </div>
+
     <div class="container">
         <header>
             <h1>🛡️ Guardian-H</h1>
-            <p class="subtitle">مولد ذاكرة المشروع للوكلاء الذكاء الاصطناعي</p>
-            <span class="badge">✅ يعمل في المتصفح - لا حاجة لتثبيت أي شيء!</span>
+            <p class="subtitle" data-en="AI Agent Memory Generator" data-ar="مولد ذاكرة الوكلاء الذكاء الاصطناعي"></p>
+            <span class="badge" data-en="✅ Works in browser - No installation needed!"
+                data-ar="✅ يعمل في المتصفح - لا حاجة لتثبيت!"></span>
         </header>
 
         <div class="methods">
             <div class="method-card">
-                <h3>📱 هذه الصفحة</h3>
-                <p style="font-size: 0.9rem; color: #8b949e;">أدخل المعلومات يدوياً</p>
+                <h3 data-en="📱 This Page" data-ar="📱 هذه الصفحة"></h3>
+                <p style="font-size: 0.9rem; color: #8b949e;" data-en="Enter info manually"
+                    data-ar="أدخل المعلومات يدوياً"></p>
             </div>
             <div class="method-card">
                 <h3>⚡ Node.js</h3>
@@ -202,25 +263,27 @@
             </div>
             <div class="method-card">
                 <h3>🐧 Bash</h3>
-                <code>curl -sL bit.ly/guardian-h | bash</code>
+                <code>curl -sL bit.ly/guardian-lite | bash</code>
             </div>
         </div>
 
         <div class="card">
-            <h2>📝 معلومات المشروع</h2>
-            
+            <h2 data-en="📝 Project Information" data-ar="📝 معلومات المشروع"></h2>
+
             <div class="form-group">
-                <label>اسم المشروع</label>
-                <input type="text" id="projectName" placeholder="مثال: my-awesome-app">
+                <label data-en="Project Name" data-ar="اسم المشروع"></label>
+                <input type="text" id="projectName" data-placeholder-en="Example: my-awesome-app"
+                    data-placeholder-ar="مثال: my-awesome-app">
             </div>
-            
+
             <div class="form-group">
-                <label>وصف المشروع (سطر واحد)</label>
-                <input type="text" id="projectPurpose" placeholder="مثال: تطبيق لإدارة المهام">
+                <label data-en="Project Description (one line)" data-ar="وصف المشروع (سطر واحد)"></label>
+                <input type="text" id="projectPurpose" data-placeholder-en="Example: Task management application"
+                    data-placeholder-ar="مثال: تطبيق لإدارة المهام">
             </div>
-            
+
             <div class="form-group">
-                <label>Tech Stack (اختر ما يناسب)</label>
+                <label data-en="Tech Stack (select what applies)" data-ar="Tech Stack (اختر ما يناسب)"></label>
                 <div class="checkbox-group">
                     <label><input type="checkbox" value="React" name="tech"> React</label>
                     <label><input type="checkbox" value="Vue" name="tech"> Vue</label>
@@ -236,16 +299,19 @@
                     <label><input type="checkbox" value="PostgreSQL" name="tech"> PostgreSQL</label>
                 </div>
             </div>
-            
+
             <div class="form-group">
-                <label>الملفات المهمة (اختياري - سطر لكل ملف)</label>
-                <textarea id="files" placeholder="src/App.jsx: main-app
+                <label data-en="Important Files (optional - one per line)"
+                    data-ar="الملفات المهمة (اختياري - سطر لكل ملف)"></label>
+                <textarea id="files" data-placeholder-en="src/App.jsx: main-app
+api/main.py: server-entry
+src/components/Button.jsx: ui-button" data-placeholder-ar="src/App.jsx: main-app
 api/main.py: server-entry
 src/components/Button.jsx: ui-button"></textarea>
             </div>
-            
+
             <div class="form-group">
-                <label>IDE المستخدم</label>
+                <label data-en="IDE" data-ar="IDE المستخدم"></label>
                 <select id="ide">
                     <option value="cursor">Cursor</option>
                     <option value="windsurf">Windsurf</option>
@@ -254,21 +320,50 @@ src/components/Button.jsx: ui-button"></textarea>
                     <option value="other">Other</option>
                 </select>
             </div>
-            
-            <button onclick="generateGuardian()">🛡️ توليد Guardian File</button>
+
+            <button class="primary" onclick="generateGuardian()" data-en="🛡️ Generate Guardian File"
+                data-ar="🛡️ توليد Guardian File"></button>
         </div>
 
         <div class="card hidden" id="resultCard">
-            <h2>✅ تم التوليد!</h2>
+            <h2 data-en="✅ Generated!" data-ar="✅ تم التوليد!"></h2>
             <div class="output" id="output"></div>
-            <button class="download-btn" onclick="downloadFile()">📥 تحميل الملف</button>
+            <button class="primary download-btn" onclick="downloadFile()" data-en="📥 Download File"
+                data-ar="📥 تحميل الملف"></button>
             <p style="margin-top: 1rem; color: #8b949e; font-size: 0.9rem;">
-                📁 انسخ الملف إلى: <span id="destPath"></span>
+                <span data-en="📁 Copy file to:" data-ar="📁 انسخ الملف إلى:"></span> <span id="destPath"></span>
             </p>
         </div>
     </div>
 
     <script>
+        let currentLang = 'en';
+
+        function setLang(lang) {
+            currentLang = lang;
+
+            // Update body direction
+            document.body.className = lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+            // Update buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update text content
+            document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+                el.textContent = el.getAttribute('data-' + lang);
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-placeholder-' + lang + ']').forEach(el => {
+                el.placeholder = el.getAttribute('data-placeholder-' + lang);
+            });
+        }
+
         function generateGuardian() {
             const name = document.getElementById('projectName').value || 'my-project';
             const purpose = document.getElementById('projectPurpose').value || 'TODO: add description';
@@ -276,9 +371,9 @@ src/components/Button.jsx: ui-button"></textarea>
             const techs = Array.from(techCheckboxes).map(cb => cb.value);
             const filesText = document.getElementById('files').value;
             const ide = document.getElementById('ide').value;
-            
+
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-            
+
             // Build tech stack
             let techStack = '';
             if (techs.length > 0) {
@@ -286,7 +381,7 @@ src/components/Button.jsx: ui-button"></textarea>
                 const backend = techs.filter(t => ['FastAPI', 'Django', 'Express', 'Flask'].includes(t));
                 const db = techs.filter(t => ['SQLite', 'PostgreSQL'].includes(t));
                 const other = techs.filter(t => ['TailwindCSS', 'TypeScript'].includes(t));
-                
+
                 if (frontend.length) techStack += `  frontend: ${frontend.join(' + ')}\n`;
                 if (backend.length) techStack += `  backend: ${backend.join(' + ')}\n`;
                 if (db.length) techStack += `  database: ${db.join(' + ')}\n`;
@@ -294,13 +389,13 @@ src/components/Button.jsx: ui-button"></textarea>
             } else {
                 techStack = '  # Please fill in your tech stack';
             }
-            
+
             // Build files
             let filesSection = filesText.trim() || '  # Add your important files here';
             if (filesText.trim()) {
                 filesSection = filesText.split('\n').map(f => `  ${f.trim()}`).join('\n');
             }
-            
+
             const mdc = `---
 description: 🛡️ GUARDIAN - Read BEFORE any action
 globs: **/*
@@ -392,11 +487,11 @@ code_quality:
 if_confused: ASK "هل تقصد X أم Y؟"
 \`\`\`
 `;
-            
+
             // Show result
             document.getElementById('output').textContent = mdc;
             document.getElementById('resultCard').classList.remove('hidden');
-            
+
             // Set destination path
             const paths = {
                 cursor: '.cursor/rules/guardian.mdc',
@@ -406,12 +501,12 @@ if_confused: ASK "هل تقصد X أم Y؟"
                 other: 'guardian.mdc'
             };
             document.getElementById('destPath').textContent = paths[ide];
-            
+
             // Store for download
             window.guardianContent = mdc;
             window.guardianFilename = paths[ide].split('/').pop();
         }
-        
+
         function downloadFile() {
             const blob = new Blob([window.guardianContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -421,6 +516,12 @@ if_confused: ASK "هل تقصد X أم Y؟"
             a.click();
             URL.revokeObjectURL(url);
         }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setLang('en');
+        });
     </script>
 </body>
+
 </html>
