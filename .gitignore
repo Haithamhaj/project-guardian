@@ -26,3 +26,14 @@ npm-debug.log*
 # Environment
 .env
 .env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+.eggs/
+
+# Generated guardian files (keep only templates)
+/guardian.mdc
