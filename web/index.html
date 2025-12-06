@@ -149,6 +149,55 @@
             margin: 1rem 0;
         }
 
+        /* Feature-Problem Rows */
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-card {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        .feature-text {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .vs-arrow {
+            color: #8b949e;
+            font-size: 1.2rem;
+        }
+
+        .problem-card {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+        }
+
+        .problem-text {
+            font-size: 0.9rem;
+            color: #f0883e;
+        }
+
         /* Tips Section */
         .tips-grid {
             display: grid;
@@ -384,56 +433,62 @@
             <span class="badge" data-en="✨ Free & Takes 2 minutes" data-ar="✨ مجاني ويستغرق دقيقتين"></span>
         </header>
 
-        <!-- Why You Need This -->
+        <!-- Features & Problems Section -->
         <div class="info-section">
-            <div class="info-title" data-en="✅ What Guardian-H Does For You" data-ar="✅ ماذا يقدم لك Guardian-H">What
-                Guardian-H Does For You</div>
+            <div class="info-title" data-en="🛡️ What Guardian-H Does" data-ar="🛡️ ماذا يفعل Guardian-H">🛡️ What
+                Guardian-H Does</div>
 
-            <ul class="solution-list">
-                <li>
-                    <span class="solution-icon">✓</span>
-                    <span data-en="Remembers your project across all sessions"
-                        data-ar="يتذكر مشروعك في كل جلسة">Remembers your project across all sessions</span>
-                </li>
-                <li>
-                    <span class="solution-icon">✓</span>
-                    <span data-en="Protects your important decisions" data-ar="يحمي قراراتك المهمة">Protects your
-                        important decisions</span>
-                </li>
-                <li>
-                    <span class="solution-icon">✓</span>
-                    <span data-en="Guides the AI to do the right thing"
-                        data-ar="يوجه الوكيل للقيام بالشيء الصحيح">Guides the AI to do the right thing</span>
-                </li>
-            </ul>
-
-            <div class="divider"></div>
-
-            <div class="info-title" data-en="😤 Problems It Solves" data-ar="😤 المشاكل التي يحلها">Problems It Solves
+            <div class="feature-row">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-text" data-en="Remembers your project" data-ar="يتذكر مشروعك">Remembers your
+                        project</div>
+                </div>
+                <div class="vs-arrow">→</div>
+                <div class="problem-card">
+                    <div class="problem-text" data-en="Solves: AI forgets what you said"
+                        data-ar="يحل: الوكيل ينسى ما قلته">Solves: AI forgets what you said</div>
+                </div>
             </div>
 
-            <ul class="problem-list">
-                <li>
-                    <span class="problem-icon">❌</span>
-                    <span data-en="AI forgets what you told it before" data-ar="الوكيل ينسى ما أخبرته سابقاً">AI forgets
-                        what you told it before</span>
-                </li>
-                <li>
-                    <span class="problem-icon">❌</span>
-                    <span data-en="AI suggests tools you don't use" data-ar="الوكيل يقترح أدوات لا تستخدمها">AI suggests
-                        tools you don't use</span>
-                </li>
-                <li>
-                    <span class="problem-icon">❌</span>
-                    <span data-en="AI creates duplicate files" data-ar="الوكيل ينشئ ملفات مكررة">AI creates duplicate
-                        files</span>
-                </li>
-                <li>
-                    <span class="problem-icon">❌</span>
-                    <span data-en="AI changes things that shouldn't change"
-                        data-ar="الوكيل يغير أشياء لا يجب تغييرها">AI changes things that shouldn't change</span>
-                </li>
-            </ul>
+            <div class="feature-row">
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-text" data-en="Protects your decisions" data-ar="يحمي قراراتك">Protects your
+                        decisions</div>
+                </div>
+                <div class="vs-arrow">→</div>
+                <div class="problem-card">
+                    <div class="problem-text" data-en="Solves: AI changes what it shouldn't"
+                        data-ar="يحل: الوكيل يغير ما لا يجب">Solves: AI changes what it shouldn't</div>
+                </div>
+            </div>
+
+            <div class="feature-row">
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <div class="feature-text" data-en="Knows your file structure" data-ar="يعرف هيكل ملفاتك">Knows your
+                        file structure</div>
+                </div>
+                <div class="vs-arrow">→</div>
+                <div class="problem-card">
+                    <div class="problem-text" data-en="Solves: AI creates duplicate files"
+                        data-ar="يحل: الوكيل ينشئ ملفات مكررة">Solves: AI creates duplicate files</div>
+                </div>
+            </div>
+
+            <div class="feature-row">
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <div class="feature-text" data-en="Knows your tech stack" data-ar="يعرف تقنياتك">Knows your tech
+                        stack</div>
+                </div>
+                <div class="vs-arrow">→</div>
+                <div class="problem-card">
+                    <div class="problem-text" data-en="Solves: AI suggests wrong tools"
+                        data-ar="يحل: الوكيل يقترح أدوات خاطئة">Solves: AI suggests wrong tools</div>
+                </div>
+            </div>
         </div>
 
         <!-- Tips Section -->
