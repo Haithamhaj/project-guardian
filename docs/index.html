@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Guardian-H - مولد ذاكرة المشروع</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #8b949e;
+            font-size: 1.1rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: var(--success);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 150px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+        
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        
+        button:hover { opacity: 0.9; }
+        
+        .output {
+            background: #0d1117;
+            border: 1px solid var(--success);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .download-btn {
+            background: var(--success);
+            margin-top: 1rem;
+        }
+        
+        .methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .method-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .method-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .method-card code {
+            display: block;
+            background: var(--bg);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            word-break: break-all;
+        }
+        
+        .hidden { display: none; }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Guardian-H</h1>
+            <p class="subtitle">مولد ذاكرة المشروع للوكلاء الذكاء الاصطناعي</p>
+            <span class="badge">✅ يعمل في المتصفح - لا حاجة لتثبيت أي شيء!</span>
+        </header>
+
+        <div class="methods">
+            <div class="method-card">
+                <h3>📱 هذه الصفحة</h3>
+                <p style="font-size: 0.9rem; color: #8b949e;">أدخل المعلومات يدوياً</p>
+            </div>
+            <div class="method-card">
+                <h3>⚡ Node.js</h3>
+                <code>npx guardian-h</code>
+            </div>
+            <div class="method-card">
+                <h3>🐧 Bash</h3>
+                <code>curl -sL bit.ly/guardian-h | bash</code>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📝 معلومات المشروع</h2>
+            
+            <div class="form-group">
+                <label>اسم المشروع</label>
+                <input type="text" id="projectName" placeholder="مثال: my-awesome-app">
+            </div>
+            
+            <div class="form-group">
+                <label>وصف المشروع (سطر واحد)</label>
+                <input type="text" id="projectPurpose" placeholder="مثال: تطبيق لإدارة المهام">
+            </div>
+            
+            <div class="form-group">
+                <label>Tech Stack (اختر ما يناسب)</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" value="React" name="tech"> React</label>
+                    <label><input type="checkbox" value="Vue" name="tech"> Vue</label>
+                    <label><input type="checkbox" value="Next.js" name="tech"> Next.js</label>
+                    <label><input type="checkbox" value="Svelte" name="tech"> Svelte</label>
+                    <label><input type="checkbox" value="FastAPI" name="tech"> FastAPI</label>
+                    <label><input type="checkbox" value="Django" name="tech"> Django</label>
+                    <label><input type="checkbox" value="Express" name="tech"> Express</label>
+                    <label><input type="checkbox" value="Flask" name="tech"> Flask</label>
+                    <label><input type="checkbox" value="TailwindCSS" name="tech"> Tailwind</label>
+                    <label><input type="checkbox" value="TypeScript" name="tech"> TypeScript</label>
+                    <label><input type="checkbox" value="SQLite" name="tech"> SQLite</label>
+                    <label><input type="checkbox" value="PostgreSQL" name="tech"> PostgreSQL</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>الملفات المهمة (اختياري - سطر لكل ملف)</label>
+                <textarea id="files" placeholder="src/App.jsx: main-app
+api/main.py: server-entry
+src/components/Button.jsx: ui-button"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>IDE المستخدم</label>
+                <select id="ide">
+                    <option value="cursor">Cursor</option>
+                    <option value="windsurf">Windsurf</option>
+                    <option value="vscode">VS Code / Copilot</option>
+                    <option value="claude">Claude Code</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <button onclick="generateGuardian()">🛡️ توليد Guardian File</button>
+        </div>
+
+        <div class="card hidden" id="resultCard">
+            <h2>✅ تم التوليد!</h2>
+            <div class="output" id="output"></div>
+            <button class="download-btn" onclick="downloadFile()">📥 تحميل الملف</button>
+            <p style="margin-top: 1rem; color: #8b949e; font-size: 0.9rem;">
+                📁 انسخ الملف إلى: <span id="destPath"></span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function generateGuardian() {
+            const name = document.getElementById('projectName').value || 'my-project';
+            const purpose = document.getElementById('projectPurpose').value || 'TODO: add description';
+            const techCheckboxes = document.querySelectorAll('input[name="tech"]:checked');
+            const techs = Array.from(techCheckboxes).map(cb => cb.value);
+            const filesText = document.getElementById('files').value;
+            const ide = document.getElementById('ide').value;
+            
+            const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+            
+            // Build tech stack
+            let techStack = '';
+            if (techs.length > 0) {
+                const frontend = techs.filter(t => ['React', 'Vue', 'Next.js', 'Svelte'].includes(t));
+                const backend = techs.filter(t => ['FastAPI', 'Django', 'Express', 'Flask'].includes(t));
+                const db = techs.filter(t => ['SQLite', 'PostgreSQL'].includes(t));
+                const other = techs.filter(t => ['TailwindCSS', 'TypeScript'].includes(t));
+                
+                if (frontend.length) techStack += `  frontend: ${frontend.join(' + ')}\n`;
+                if (backend.length) techStack += `  backend: ${backend.join(' + ')}\n`;
+                if (db.length) techStack += `  database: ${db.join(' + ')}\n`;
+                if (other.length) techStack += `  tools: ${other.join(', ')}\n`;
+            } else {
+                techStack = '  # Please fill in your tech stack';
+            }
+            
+            // Build files
+            let filesSection = filesText.trim() || '  # Add your important files here';
+            if (filesText.trim()) {
+                filesSection = filesText.split('\n').map(f => `  ${f.trim()}`).join('\n');
+            }
+            
+            const mdc = `---
+description: 🛡️ GUARDIAN - Read BEFORE any action
+globs: **/*
+alwaysApply: true
+---
+
+# 🛡️ ${name} GUARDIAN
+> Auto-synced: ${timestamp}
+
+---
+
+## 📋 RULES (Decision Table)
+
+| Action | Check | Do |
+|--------|-------|-----|
+| Create file | \`FILES\` has similar? | → ASK user first |
+| Modify file | In \`DANGER\`? | → WARN before proceed |
+| Change config | In \`LOCKED\`? | → STOP, ask approval |
+| Any change | - | → TEST then UPDATE |
+
+---
+
+## ⚡ QUICK_RULES
+\`\`\`yaml
+before_action:
+  1: Read this file
+  2: Check FILES section
+  3: Check DANGER section
+  4: If unclear → ASK user
+
+after_action:
+  1: Test the change
+  2: Update CHANGES section
+  3: Show proof of success
+\`\`\`
+
+---
+
+## 🏗️ TECH_STACK
+\`\`\`yaml
+# ❌ DO NOT SUGGEST ALTERNATIVES
+${techStack}\`\`\`
+
+---
+
+## 📂 FILES
+\`\`\`yaml
+# CHECK before creating
+${filesSection}
+\`\`\`
+
+---
+
+## 🔒 LOCKED
+\`\`\`yaml
+# CANNOT change without user approval
+  # Add locked decisions here
+\`\`\`
+
+---
+
+## ⚠️ DANGER
+\`\`\`yaml
+# WARN before touching
+  # Add dangerous files here
+\`\`\`
+
+---
+
+## 📝 CHANGES
+\`\`\`yaml
+- ${timestamp}: Initial Guardian setup (web generator)
+\`\`\`
+
+---
+
+## 🧠 THINKING
+\`\`\`yaml
+problem_solving:
+  1: Read error → Trace flow → Find root cause
+  2: Check FILES → Check DANGER → Design solution
+  3: One change → Test → Confirm → Show proof
+
+code_quality:
+  performance: Measure first, optimize later
+  extensibility: Small functions, DI
+  simplicity: KISS, YAGNI, DRY
+
+if_confused: ASK "هل تقصد X أم Y؟"
+\`\`\`
+`;
+            
+            // Show result
+            document.getElementById('output').textContent = mdc;
+            document.getElementById('resultCard').classList.remove('hidden');
+            
+            // Set destination path
+            const paths = {
+                cursor: '.cursor/rules/guardian.mdc',
+                windsurf: '.windsurf/rules/guardian.md',
+                vscode: '.github/copilot-instructions.md',
+                claude: 'CLAUDE.md',
+                other: 'guardian.mdc'
+            };
+            document.getElementById('destPath').textContent = paths[ide];
+            
+            // Store for download
+            window.guardianContent = mdc;
+            window.guardianFilename = paths[ide].split('/').pop();
+        }
+        
+        function downloadFile() {
+            const blob = new Blob([window.guardianContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = window.guardianFilename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
