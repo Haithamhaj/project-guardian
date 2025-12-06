@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛡️ Guardian-H - AI Agent Memory Generator</title>
+    <title>🛡️ Guardian-H - Make Your AI Assistant Smarter</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -27,8 +27,8 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 2rem;
-            transition: direction 0.3s;
+            padding: 1rem;
+            line-height: 1.6;
         }
 
         body.rtl {
@@ -36,39 +36,9 @@
             text-align: right;
         }
 
-        body.ltr {
-            direction: ltr;
-            text-align: left;
-        }
-
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #8b949e;
-            font-size: 1.1rem;
-        }
-
-        .badge {
-            display: inline-block;
-            background: var(--success);
-            color: #000;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
         }
 
         .lang-toggle {
@@ -81,6 +51,7 @@
             padding: 0.5rem;
             border-radius: 0.5rem;
             border: 1px solid var(--border);
+            z-index: 100;
         }
 
         .lang-btn {
@@ -90,7 +61,6 @@
             color: var(--text);
             cursor: pointer;
             border-radius: 0.25rem;
-            font-size: 0.9rem;
         }
 
         .lang-btn.active {
@@ -98,24 +68,74 @@
             color: #000;
         }
 
+        header {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-text {
+            font-size: 1.2rem;
+            color: #8b949e;
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--success);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
         .card {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 0.75rem;
+            border-radius: 1rem;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
 
-        .card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+        .step-header {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .step-desc {
+            color: #8b949e;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         label {
@@ -124,120 +144,164 @@
             font-weight: 500;
         }
 
+        .help-text {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-top: 0.25rem;
+        }
+
         input,
-        textarea,
         select {
             width: 100%;
-            padding: 0.75rem;
+            padding: 1rem;
             background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
             color: var(--text);
             font-size: 1rem;
         }
 
-        textarea {
-            min-height: 150px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.9rem;
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
-        button.primary {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s;
-        }
-
-        button.primary:hover {
-            opacity: 0.9;
-        }
-
-        .output {
-            background: #0d1117;
-            border: 1px solid var(--success);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            max-height: 400px;
-            overflow-y: auto;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .download-btn {
-            background: var(--success);
-            margin-top: 1rem;
-        }
-
-        .methods {
+        .options-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
         }
 
-        .method-card {
-            background: var(--card);
-            border: 1px solid var(--border);
+        .option-card {
+            background: var(--bg);
+            border: 2px solid var(--border);
             border-radius: 0.75rem;
             padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
             text-align: center;
         }
 
-        .method-card h3 {
-            font-size: 1rem;
+        .option-card:hover {
+            border-color: var(--accent);
+        }
+
+        .option-card.selected {
+            border-color: var(--success);
+            background: rgba(63, 185, 80, 0.1);
+        }
+
+        .option-icon {
+            font-size: 2rem;
             margin-bottom: 0.5rem;
         }
 
-        .method-card code {
-            display: block;
+        .option-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .option-desc {
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, var(--accent), #1f6feb);
+            color: #fff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        button.primary:hover {
+            transform: scale(1.02);
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, var(--success), #238636);
+        }
+
+        .output-card {
+            background: var(--card);
+            border: 2px solid var(--success);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .success-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .instruction-box {
             background: var(--bg);
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
-            word-break: break-all;
-            direction: ltr;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .instruction-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .instruction-num {
+            background: var(--accent);
+            color: #000;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
         .hidden {
             display: none;
         }
 
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--bg);
-            padding: 0.5rem 0.75rem;
+        .copy-btn {
+            background: var(--border);
+            color: var(--text);
+            border: none;
+            padding: 0.5rem 1rem;
             border-radius: 0.5rem;
             cursor: pointer;
-            font-weight: normal;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
         }
 
-        .checkbox-group input {
-            width: auto;
+        .path-display {
+            background: var(--bg);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
         }
     </style>
 </head>
 
 <body class="ltr">
-    <!-- Language Toggle -->
     <div class="lang-toggle">
         <button class="lang-btn active" onclick="setLang('en')">English</button>
         <button class="lang-btn" onclick="setLang('ar')">العربية</button>
@@ -246,155 +310,200 @@
     <div class="container">
         <header>
             <h1>🛡️ Guardian-H</h1>
-            <p class="subtitle" data-en="AI Agent Memory Generator" data-ar="مولد ذاكرة الوكلاء الذكاء الاصطناعي"></p>
-            <span class="badge" data-en="✅ Works in browser - No installation needed!"
-                data-ar="✅ يعمل في المتصفح - لا حاجة لتثبيت!"></span>
+            <p class="hero-text"
+                data-en="Make your AI coding assistant understand your project better. No coding knowledge needed!"
+                data-ar="اجعل مساعد الذكاء الاصطناعي يفهم مشروعك بشكل أفضل. لا تحتاج معرفة برمجية!"></p>
+            <span class="badge" data-en="✨ 2 minutes only!" data-ar="✨ دقيقتين فقط!"></span>
         </header>
 
-        <div class="methods">
-            <div class="method-card">
-                <h3 data-en="📱 This Page" data-ar="📱 هذه الصفحة"></h3>
-                <p style="font-size: 0.9rem; color: #8b949e;" data-en="Enter info manually"
-                    data-ar="أدخل المعلومات يدوياً"></p>
+        <!-- Step 1: What is your project? -->
+        <div class="card" id="step1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title" data-en="What's your project called?" data-ar="ما اسم مشروعك؟"></div>
             </div>
-            <div class="method-card">
-                <h3>⚡ Node.js</h3>
-                <code>npx guardian-h</code>
-            </div>
-            <div class="method-card">
-                <h3>🐧 Bash</h3>
-                <code>curl -sL bit.ly/guardian-lite | bash</code>
+            <p class="step-desc" data-en="Give it any name you want. This helps the AI remember it."
+                data-ar="أعطه أي اسم تريده. هذا يساعد الوكيل على تذكره."></p>
+
+            <div class="form-group">
+                <input type="text" id="projectName" data-placeholder-en="Example: My Website"
+                    data-placeholder-ar="مثال: موقعي الشخصي" placeholder="Example: My Website">
             </div>
         </div>
 
-        <div class="card">
-            <h2 data-en="📝 Project Information" data-ar="📝 معلومات المشروع"></h2>
-
-            <div class="form-group">
-                <label data-en="Project Name" data-ar="اسم المشروع"></label>
-                <input type="text" id="projectName" data-placeholder-en="Example: my-awesome-app"
-                    data-placeholder-ar="مثال: my-awesome-app">
+        <!-- Step 2: What does it do? -->
+        <div class="card" id="step2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title" data-en="What does your project do?" data-ar="ماذا يفعل مشروعك؟"></div>
             </div>
+            <p class="step-desc" data-en="Describe it in simple words. The AI will use this to understand your goals."
+                data-ar="صفه بكلمات بسيطة. الوكيل سيستخدم هذا لفهم أهدافك."></p>
 
             <div class="form-group">
-                <label data-en="Project Description (one line)" data-ar="وصف المشروع (سطر واحد)"></label>
-                <input type="text" id="projectPurpose" data-placeholder-en="Example: Task management application"
-                    data-placeholder-ar="مثال: تطبيق لإدارة المهام">
+                <input type="text" id="projectPurpose" data-placeholder-en="Example: A website to sell my products"
+                    data-placeholder-ar="مثال: موقع لبيع منتجاتي" placeholder="Example: A website to sell my products">
             </div>
+        </div>
 
-            <div class="form-group">
-                <label data-en="Tech Stack (select what applies)" data-ar="Tech Stack (اختر ما يناسب)"></label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" value="React" name="tech"> React</label>
-                    <label><input type="checkbox" value="Vue" name="tech"> Vue</label>
-                    <label><input type="checkbox" value="Next.js" name="tech"> Next.js</label>
-                    <label><input type="checkbox" value="Svelte" name="tech"> Svelte</label>
-                    <label><input type="checkbox" value="FastAPI" name="tech"> FastAPI</label>
-                    <label><input type="checkbox" value="Django" name="tech"> Django</label>
-                    <label><input type="checkbox" value="Express" name="tech"> Express</label>
-                    <label><input type="checkbox" value="Flask" name="tech"> Flask</label>
-                    <label><input type="checkbox" value="TailwindCSS" name="tech"> Tailwind</label>
-                    <label><input type="checkbox" value="TypeScript" name="tech"> TypeScript</label>
-                    <label><input type="checkbox" value="SQLite" name="tech"> SQLite</label>
-                    <label><input type="checkbox" value="PostgreSQL" name="tech"> PostgreSQL</label>
+        <!-- Step 3: What type of project? -->
+        <div class="card" id="step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title" data-en="What type of project is it?" data-ar="ما نوع المشروع؟"></div>
+            </div>
+            <p class="step-desc" data-en="Pick the one that sounds closest. Don't worry if you're not sure!"
+                data-ar="اختر الأقرب. لا تقلق إذا لم تكن متأكداً!"></p>
+
+            <div class="options-grid">
+                <div class="option-card" onclick="selectType(this, 'website')">
+                    <div class="option-icon">🌐</div>
+                    <div class="option-title" data-en="Website" data-ar="موقع ويب"></div>
+                    <div class="option-desc" data-en="Blog, shop, portfolio" data-ar="مدونة، متجر، معرض أعمال"></div>
+                </div>
+                <div class="option-card" onclick="selectType(this, 'app')">
+                    <div class="option-icon">📱</div>
+                    <div class="option-title" data-en="Mobile App" data-ar="تطبيق جوال"></div>
+                    <div class="option-desc" data-en="iOS, Android app" data-ar="تطبيق iOS أو Android"></div>
+                </div>
+                <div class="option-card" onclick="selectType(this, 'desktop')">
+                    <div class="option-icon">💻</div>
+                    <div class="option-title" data-en="Desktop App" data-ar="برنامج كمبيوتر"></div>
+                    <div class="option-desc" data-en="Mac, Windows app" data-ar="برنامج Mac أو Windows"></div>
+                </div>
+                <div class="option-card" onclick="selectType(this, 'other')">
+                    <div class="option-icon">🤷</div>
+                    <div class="option-title" data-en="Not Sure" data-ar="غير متأكد"></div>
+                    <div class="option-desc" data-en="That's okay!" data-ar="لا مشكلة!"></div>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label data-en="Important Files (optional - one per line)"
-                    data-ar="الملفات المهمة (اختياري - سطر لكل ملف)"></label>
-                <textarea id="files" data-placeholder-en="src/App.jsx: main-app
-api/main.py: server-entry
-src/components/Button.jsx: ui-button" data-placeholder-ar="src/App.jsx: main-app
-api/main.py: server-entry
-src/components/Button.jsx: ui-button"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label data-en="IDE" data-ar="IDE المستخدم"></label>
-                <select id="ide">
-                    <option value="cursor">Cursor</option>
-                    <option value="windsurf">Windsurf</option>
-                    <option value="vscode">VS Code / Copilot</option>
-                    <option value="claude">Claude Code</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-
-            <button class="primary" onclick="generateGuardian()" data-en="🛡️ Generate Guardian File"
-                data-ar="🛡️ توليد Guardian File"></button>
         </div>
 
-        <div class="card hidden" id="resultCard">
-            <h2 data-en="✅ Generated!" data-ar="✅ تم التوليد!"></h2>
-            <div class="output" id="output"></div>
-            <button class="primary download-btn" onclick="downloadFile()" data-en="📥 Download File"
+        <!-- Step 4: Which AI tool? -->
+        <div class="card" id="step4">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <div class="step-title" data-en="Which AI tool do you use?" data-ar="أي أداة ذكاء اصطناعي تستخدم؟">
+                </div>
+            </div>
+            <p class="step-desc" data-en="Pick the one you code with. This helps us put the file in the right place."
+                data-ar="اختر الأداة التي تبرمج بها. هذا يساعدنا نضع الملف في المكان الصحيح."></p>
+
+            <div class="options-grid">
+                <div class="option-card" onclick="selectIDE(this, 'cursor')">
+                    <div class="option-icon">⚡</div>
+                    <div class="option-title">Cursor</div>
+                </div>
+                <div class="option-card" onclick="selectIDE(this, 'windsurf')">
+                    <div class="option-icon">🏄</div>
+                    <div class="option-title">Windsurf</div>
+                </div>
+                <div class="option-card" onclick="selectIDE(this, 'vscode')">
+                    <div class="option-icon">💜</div>
+                    <div class="option-title">VS Code / Copilot</div>
+                </div>
+                <div class="option-card" onclick="selectIDE(this, 'claude')">
+                    <div class="option-icon">🧠</div>
+                    <div class="option-title">Claude</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="primary" onclick="generate()" id="generateBtn" data-en="✨ Create My Guardian File"
+            data-ar="✨ أنشئ ملف Guardian"></button>
+
+        <!-- Result -->
+        <div class="output-card hidden" id="result">
+            <div class="success-icon">🎉</div>
+            <div class="success-title" data-en="Your file is ready!" data-ar="ملفك جاهز!"></div>
+
+            <button class="primary download-btn" onclick="download()" data-en="📥 Download File"
                 data-ar="📥 تحميل الملف"></button>
-            <p style="margin-top: 1rem; color: #8b949e; font-size: 0.9rem;">
-                <span data-en="📁 Copy file to:" data-ar="📁 انسخ الملف إلى:"></span> <span id="destPath"></span>
-            </p>
+
+            <div class="instruction-box">
+                <div class="instruction-step">
+                    <div class="instruction-num">1</div>
+                    <div data-en="Download the file above" data-ar="حمّل الملف أعلاه"></div>
+                </div>
+                <div class="instruction-step">
+                    <div class="instruction-num">2</div>
+                    <div><span data-en="Put it in this folder:" data-ar="ضعه في هذا المجلد:"></span>
+                        <div class="path-display" id="pathDisplay"></div>
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <div class="instruction-num">3</div>
+                    <div data-en="Open your project and start chatting with your AI!"
+                        data-ar="افتح مشروعك وابدأ المحادثة مع الوكيل!"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let currentLang = 'en';
+        let selectedType = '';
+        let selectedIDE = '';
 
         function setLang(lang) {
             currentLang = lang;
-
-            // Update body direction
             document.body.className = lang === 'ar' ? 'rtl' : 'ltr';
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 
-            // Update buttons
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Update text content
             document.querySelectorAll('[data-' + lang + ']').forEach(el => {
                 el.textContent = el.getAttribute('data-' + lang);
             });
 
-            // Update placeholders
             document.querySelectorAll('[data-placeholder-' + lang + ']').forEach(el => {
                 el.placeholder = el.getAttribute('data-placeholder-' + lang);
             });
         }
 
-        function generateGuardian() {
-            const name = document.getElementById('projectName').value || 'my-project';
-            const purpose = document.getElementById('projectPurpose').value || 'TODO: add description';
-            const techCheckboxes = document.querySelectorAll('input[name="tech"]:checked');
-            const techs = Array.from(techCheckboxes).map(cb => cb.value);
-            const filesText = document.getElementById('files').value;
-            const ide = document.getElementById('ide').value;
+        function selectType(el, type) {
+            document.querySelectorAll('#step3 .option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedType = type;
+        }
 
+        function selectIDE(el, ide) {
+            document.querySelectorAll('#step4 .option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedIDE = ide;
+        }
+
+        function generate() {
+            const name = document.getElementById('projectName').value || 'My Project';
+            const purpose = document.getElementById('projectPurpose').value || 'My awesome project';
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
 
-            // Build tech stack
-            let techStack = '';
-            if (techs.length > 0) {
-                const frontend = techs.filter(t => ['React', 'Vue', 'Next.js', 'Svelte'].includes(t));
-                const backend = techs.filter(t => ['FastAPI', 'Django', 'Express', 'Flask'].includes(t));
-                const db = techs.filter(t => ['SQLite', 'PostgreSQL'].includes(t));
-                const other = techs.filter(t => ['TailwindCSS', 'TypeScript'].includes(t));
+            // Simple type mapping
+            const typeMap = {
+                'website': 'frontend: Web',
+                'app': 'frontend: Mobile App',
+                'desktop': 'frontend: Desktop App',
+                'other': '# Will be detected automatically'
+            };
 
-                if (frontend.length) techStack += `  frontend: ${frontend.join(' + ')}\n`;
-                if (backend.length) techStack += `  backend: ${backend.join(' + ')}\n`;
-                if (db.length) techStack += `  database: ${db.join(' + ')}\n`;
-                if (other.length) techStack += `  tools: ${other.join(', ')}\n`;
-            } else {
-                techStack = '  # Please fill in your tech stack';
-            }
+            const pathMap = {
+                'cursor': '.cursor/rules/',
+                'windsurf': '.windsurf/rules/',
+                'vscode': '.github/',
+                'claude': '(project root)',
+                '': '(your project folder)'
+            };
 
-            // Build files
-            let filesSection = filesText.trim() || '  # Add your important files here';
-            if (filesText.trim()) {
-                filesSection = filesText.split('\n').map(f => `  ${f.trim()}`).join('\n');
-            }
+            const fileMap = {
+                'cursor': 'guardian.mdc',
+                'windsurf': 'guardian.md',
+                'vscode': 'copilot-instructions.md',
+                'claude': 'CLAUDE.md',
+                '': 'guardian.mdc'
+            };
 
             const mdc = `---
 description: 🛡️ GUARDIAN - Read BEFORE any action
@@ -403,111 +512,67 @@ alwaysApply: true
 ---
 
 # 🛡️ ${name} GUARDIAN
-> Auto-synced: ${timestamp}
+> Purpose: ${purpose}
+> Updated: ${timestamp}
 
 ---
 
-## 📋 RULES (Decision Table)
+## 📋 SIMPLE RULES
 
-| Action | Check | Do |
-|--------|-------|-----|
-| Create file | \`FILES\` has similar? | → ASK user first |
-| Modify file | In \`DANGER\`? | → WARN before proceed |
-| Change config | In \`LOCKED\`? | → STOP, ask approval |
-| Any change | - | → TEST then UPDATE |
+| Before doing anything | Do this |
+|-----------------------|---------|
+| Creating a new file | Ask: "Does a similar file exist?" |
+| Changing something | Ask: "Will this break anything?" |
+| Not sure | Ask: "What do you mean?" |
 
 ---
 
-## ⚡ QUICK_RULES
+## 🏗️ PROJECT TYPE
 \`\`\`yaml
-before_action:
-  1: Read this file
-  2: Check FILES section
-  3: Check DANGER section
-  4: If unclear → ASK user
-
-after_action:
-  1: Test the change
-  2: Update CHANGES section
-  3: Show proof of success
+${typeMap[selectedType] || typeMap['other']}
 \`\`\`
 
 ---
 
-## 🏗️ TECH_STACK
+## 📂 IMPORTANT FILES
 \`\`\`yaml
-# ❌ DO NOT SUGGEST ALTERNATIVES
-${techStack}\`\`\`
-
----
-
-## 📂 FILES
-\`\`\`yaml
-# CHECK before creating
-${filesSection}
+# Add your important files here
+# Example: src/main.js: main-file
 \`\`\`
 
 ---
 
-## 🔒 LOCKED
+## 🔒 DON'T CHANGE
 \`\`\`yaml
-# CANNOT change without user approval
-  # Add locked decisions here
+# List things the AI should never change
+# Example: - Don't change the database
 \`\`\`
 
 ---
 
-## ⚠️ DANGER
+## ⚠️ BE CAREFUL
 \`\`\`yaml
-# WARN before touching
-  # Add dangerous files here
+# List sensitive files
+# Example: - config.js: has passwords
 \`\`\`
 
 ---
 
-## 📝 CHANGES
+## 📝 HISTORY
 \`\`\`yaml
-- ${timestamp}: Initial Guardian setup (web generator)
-\`\`\`
-
----
-
-## 🧠 THINKING
-\`\`\`yaml
-problem_solving:
-  1: Read error → Trace flow → Find root cause
-  2: Check FILES → Check DANGER → Design solution
-  3: One change → Test → Confirm → Show proof
-
-code_quality:
-  performance: Measure first, optimize later
-  extensibility: Small functions, DI
-  simplicity: KISS, YAGNI, DRY
-
-if_confused: ASK "هل تقصد X أم Y؟"
+- ${timestamp}: Created with Guardian-H web generator
 \`\`\`
 `;
 
-            // Show result
-            document.getElementById('output').textContent = mdc;
-            document.getElementById('resultCard').classList.remove('hidden');
-
-            // Set destination path
-            const paths = {
-                cursor: '.cursor/rules/guardian.mdc',
-                windsurf: '.windsurf/rules/guardian.md',
-                vscode: '.github/copilot-instructions.md',
-                claude: 'CLAUDE.md',
-                other: 'guardian.mdc'
-            };
-            document.getElementById('destPath').textContent = paths[ide];
-
-            // Store for download
             window.guardianContent = mdc;
-            window.guardianFilename = paths[ide].split('/').pop();
+            window.guardianFilename = fileMap[selectedIDE] || 'guardian.mdc';
+
+            document.getElementById('pathDisplay').textContent = pathMap[selectedIDE] + window.guardianFilename;
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function downloadFile() {
+        function download() {
             const blob = new Blob([window.guardianContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -518,9 +583,7 @@ if_confused: ASK "هل تقصد X أم Y؟"
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            setLang('en');
-        });
+        setLang('en');
     </script>
 </body>
 
