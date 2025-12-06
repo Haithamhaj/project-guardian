@@ -1,9 +1,9 @@
 {
-  "name": "create-guardian",
+  "name": "guardian-h",
   "version": "4.0.0",
-  "description": "🛡️ Guardian - Your AI Agent's Memory System",
+  "description": "🛡️ Guardian-H - Your AI Agent's Memory System",
   "bin": {
-    "create-guardian": "./bin/create-guardian.js"
+    "guardian-h": "./bin/create-guardian.js"
   },
   "scripts": {
     "scan": "node bin/create-guardian.js"
@@ -15,7 +15,8 @@
     "windsurf",
     "copilot",
     "memory",
-    "project-rules"
+    "project-rules",
+    "guardian"
   ],
   "author": "Haitham",
   "license": "MIT",

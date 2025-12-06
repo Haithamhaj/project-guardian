@@ -24,7 +24,7 @@ none             → TARGET: CLAUDE.md (root)
 ### STEP 2: Download Scanner | حمّل الماسح
 
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/src/guardian_scanner.py -o /tmp/guardian_scanner.py
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/src/guardian_scanner.py -o /tmp/guardian_scanner.py
 ```
 
 Or use the embedded scanner below.

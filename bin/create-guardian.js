@@ -71,7 +71,7 @@ async function main() {
   
   log('📥 Downloading Guardian scanner...', 'blue');
   
-  const scannerUrl = 'https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/src/guardian_scanner.py';
+  const scannerUrl = 'https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/src/guardian_scanner.py';
   const scannerPath = path.join(tempDir, 'scanner.py');
   
   try {

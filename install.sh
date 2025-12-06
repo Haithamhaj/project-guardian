@@ -16,7 +16,7 @@ if [ ! -d ".git" ] && [ ! -f "package.json" ] && [ ! -f "requirements.txt" ]; th
 fi
 
 # Download Guardian
-GUARDIAN_URL="https://raw.githubusercontent.com/Haithamhaj/project-guardian/main"
+GUARDIAN_URL="https://raw.githubusercontent.com/Haithamhaj/guardian-h/main"
 
 echo "📥 Downloading Guardian scanner..."
 mkdir -p .guardian

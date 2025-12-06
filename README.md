@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ Project Guardian
+# 🛡️ Guardian-H
 
 ### Your AI Agent's Memory System | نظام ذاكرة الوكيل الذكي
 
@@ -57,17 +57,17 @@ Agent: Suggests Vue (you use React)
 
 ### Option 1: One Command
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 ### Option 2: npx (after npm publish)
 ```bash
-npx create-guardian
+npx guardian-h
 ```
 
 ### Option 3: Tell Your Agent
 ```
-Install Project Guardian from: github.com/Haithamhaj/project-guardian
+Install Guardian-H from: github.com/Haithamhaj/guardian-h
 ```
 
 ---
@@ -167,17 +167,17 @@ Update Guardian snapshot
 
 ### الخيار 1: أمر واحد
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 ### الخيار 2: npx (بعد النشر على npm)
 ```bash
-npx create-guardian
+npx guardian-h
 ```
 
 ### الخيار 3: قل للوكيل
 ```
-Install Project Guardian from: github.com/Haithamhaj/project-guardian
+Install Guardian-H from: github.com/Haithamhaj/guardian-h
 ```
 
 ---
@@ -251,7 +251,7 @@ MIT - Use it, modify it, ship it.
 
 ---
 
-**🛡️ Project Guardian**
+**🛡️ Guardian-H**
 
 *Discover. Remember. Protect.*
 

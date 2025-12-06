@@ -23,7 +23,7 @@ curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/inst
 افتح محادثة مع الوكيل (Cursor, Windsurf, إلخ) واكتب:
 
 ```
-Install Project Guardian from: github.com/Haithamhaj/project-guardian
+Install Guardian-H from: github.com/Haithamhaj/project-guardian
 ```
 
 الوكيل سيقرأ AGENT_INSTALL.md ويثبت Guardian تلقائياً.
