@@ -13,7 +13,8 @@
             --text: #c9d1d9;
             --accent: #58a6ff;
             --success: #3fb950;
-            --warning: #d29922;
+            --warning: #f0883e;
+            --danger: #f85149;
         }
 
         * {
@@ -37,7 +38,7 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -70,19 +71,25 @@
 
         header {
             text-align: center;
-            padding: 2rem 0;
+            padding: 2rem 0 1rem;
+        }
+
+        .logo {
+            width: 180px;
+            margin-bottom: 1rem;
+            border-radius: 8px;
         }
 
         h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
         }
 
         .hero-text {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: #8b949e;
             max-width: 500px;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 1rem;
         }
 
         .badge {
@@ -95,24 +102,98 @@
             font-weight: 600;
         }
 
+        /* Info Section */
+        .info-section {
+            background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .problem-list,
+        .solution-list {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .problem-list li,
+        .solution-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .problem-icon {
+            color: var(--danger);
+            font-size: 1.2rem;
+        }
+
+        .solution-icon {
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 1rem 0;
+        }
+
+        /* Tips Section */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .tip-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .tip-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-text {
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+
+        /* Form Cards */
         .card {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .step-header {
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .step-number {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: var(--accent);
             color: #000;
             border-radius: 50%;
@@ -120,11 +201,10 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.2rem;
         }
 
         .step-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
 
@@ -132,22 +212,6 @@
             color: #8b949e;
             margin-bottom: 1rem;
             font-size: 0.95rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .help-text {
-            font-size: 0.85rem;
-            color: #8b949e;
-            margin-top: 0.25rem;
         }
 
         input,
@@ -179,8 +243,8 @@
             border-radius: 0.75rem;
             padding: 1rem;
             cursor: pointer;
-            transition: all 0.2s;
             text-align: center;
+            transition: all 0.2s;
         }
 
         .option-card:hover {
@@ -193,13 +257,12 @@
         }
 
         .option-icon {
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 0.5rem;
         }
 
         .option-title {
             font-weight: 600;
-            margin-bottom: 0.25rem;
         }
 
         .option-desc {
@@ -217,7 +280,7 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s;
+            margin-top: 1rem;
         }
 
         button.primary:hover {
@@ -233,17 +296,18 @@
             border: 2px solid var(--success);
             border-radius: 1rem;
             padding: 1.5rem;
+            margin-top: 1rem;
         }
 
         .success-icon {
-            font-size: 4rem;
+            font-size: 3rem;
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .success-title {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin-bottom: 1rem;
         }
 
@@ -264,39 +328,43 @@
         .instruction-num {
             background: var(--accent);
             color: #000;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             flex-shrink: 0;
+        }
+
+        .path-display {
+            background: #000;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .hidden {
             display: none;
         }
 
-        .copy-btn {
-            background: var(--border);
-            color: var(--text);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #8b949e;
             font-size: 0.9rem;
-            margin-top: 0.5rem;
         }
 
-        .path-display {
-            background: var(--bg);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            font-family: monospace;
-            direction: ltr;
-            text-align: left;
+        footer img {
+            width: 120px;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -313,81 +381,150 @@
             <p class="hero-text"
                 data-en="Make your AI coding assistant understand your project better. No coding knowledge needed!"
                 data-ar="اجعل مساعد الذكاء الاصطناعي يفهم مشروعك بشكل أفضل. لا تحتاج معرفة برمجية!"></p>
-            <span class="badge" data-en="✨ 2 minutes only!" data-ar="✨ دقيقتين فقط!"></span>
+            <span class="badge" data-en="✨ Free & Takes 2 minutes" data-ar="✨ مجاني ويستغرق دقيقتين"></span>
         </header>
 
-        <!-- Step 1: What is your project? -->
-        <div class="card" id="step1">
+        <!-- Why You Need This -->
+        <div class="info-section">
+            <div class="info-title" data-en="😤 The Problem with AI Assistants"
+                data-ar="😤 مشكلة مساعدي الذكاء الاصطناعي"></div>
+
+            <ul class="problem-list">
+                <li>
+                    <span class="problem-icon">❌</span>
+                    <span data-en="They forget what you told them before" data-ar="ينسون ما أخبرتهم به سابقاً"></span>
+                </li>
+                <li>
+                    <span class="problem-icon">❌</span>
+                    <span data-en="They suggest tools you don't use" data-ar="يقترحون أدوات لا تستخدمها"></span>
+                </li>
+                <li>
+                    <span class="problem-icon">❌</span>
+                    <span data-en="They create duplicate files" data-ar="ينشئون ملفات مكررة"></span>
+                </li>
+                <li>
+                    <span class="problem-icon">❌</span>
+                    <span data-en="They change things that shouldn't be changed"
+                        data-ar="يغيرون أشياء لا يجب تغييرها"></span>
+                </li>
+            </ul>
+
+            <div class="divider"></div>
+
+            <div class="info-title" data-en="✅ How Guardian-H Helps" data-ar="✅ كيف يساعد Guardian-H"></div>
+
+            <ul class="solution-list">
+                <li>
+                    <span class="solution-icon">✓</span>
+                    <span data-en="Remembers your project details forever" data-ar="يتذكر تفاصيل مشروعك للأبد"></span>
+                </li>
+                <li>
+                    <span class="solution-icon">✓</span>
+                    <span data-en="Protects your important decisions" data-ar="يحمي قراراتك المهمة"></span>
+                </li>
+                <li>
+                    <span class="solution-icon">✓</span>
+                    <span data-en="Guides the AI to do the right thing"
+                        data-ar="يوجه الوكيل للقيام بالشيء الصحيح"></span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="info-section">
+            <div class="info-title" data-en="💡 Tips for Working with AI"
+                data-ar="💡 نصائح للتعامل مع الذكاء الاصطناعي"></div>
+
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">🎯</div>
+                    <div class="tip-text" data-en="Be specific in your requests" data-ar="كن محدداً في طلباتك"></div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">✋</div>
+                    <div class="tip-text" data-en="Ask for confirmation before big changes"
+                        data-ar="اطلب تأكيداً قبل التغييرات الكبيرة"></div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">👀</div>
+                    <div class="tip-text" data-en="Review code before approving" data-ar="راجع الكود قبل الموافقة">
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔒</div>
+                    <div class="tip-text" data-en="Tell AI what NOT to change" data-ar="أخبر الوكيل بما لا يجب تغييره">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="card">
             <div class="step-header">
                 <div class="step-number">1</div>
                 <div class="step-title" data-en="What's your project called?" data-ar="ما اسم مشروعك؟"></div>
             </div>
-            <p class="step-desc" data-en="Give it any name you want. This helps the AI remember it."
-                data-ar="أعطه أي اسم تريده. هذا يساعد الوكيل على تذكره."></p>
-
-            <div class="form-group">
-                <input type="text" id="projectName" data-placeholder-en="Example: My Website"
-                    data-placeholder-ar="مثال: موقعي الشخصي" placeholder="Example: My Website">
-            </div>
+            <p class="step-desc" data-en="Any name you want. This helps the AI remember it."
+                data-ar="أي اسم تريده. هذا يساعد الوكيل على تذكره."></p>
+            <input type="text" id="projectName" data-placeholder-en="Example: My Online Store"
+                data-placeholder-ar="مثال: متجري الإلكتروني" placeholder="Example: My Online Store">
         </div>
 
-        <!-- Step 2: What does it do? -->
-        <div class="card" id="step2">
+        <!-- Step 2 -->
+        <div class="card">
             <div class="step-header">
                 <div class="step-number">2</div>
                 <div class="step-title" data-en="What does your project do?" data-ar="ماذا يفعل مشروعك؟"></div>
             </div>
-            <p class="step-desc" data-en="Describe it in simple words. The AI will use this to understand your goals."
-                data-ar="صفه بكلمات بسيطة. الوكيل سيستخدم هذا لفهم أهدافك."></p>
-
-            <div class="form-group">
-                <input type="text" id="projectPurpose" data-placeholder-en="Example: A website to sell my products"
-                    data-placeholder-ar="مثال: موقع لبيع منتجاتي" placeholder="Example: A website to sell my products">
-            </div>
+            <p class="step-desc" data-en="Describe it simply. The AI will use this to understand your goals."
+                data-ar="صفه ببساطة. الوكيل سيستخدم هذا لفهم أهدافك."></p>
+            <input type="text" id="projectPurpose"
+                data-placeholder-en="Example: A website where I sell handmade products"
+                data-placeholder-ar="مثال: موقع لبيع المنتجات اليدوية"
+                placeholder="Example: A website where I sell handmade products">
         </div>
 
-        <!-- Step 3: What type of project? -->
-        <div class="card" id="step3">
+        <!-- Step 3 -->
+        <div class="card">
             <div class="step-header">
                 <div class="step-number">3</div>
-                <div class="step-title" data-en="What type of project is it?" data-ar="ما نوع المشروع؟"></div>
+                <div class="step-title" data-en="What type of project?" data-ar="ما نوع المشروع؟"></div>
             </div>
-            <p class="step-desc" data-en="Pick the one that sounds closest. Don't worry if you're not sure!"
-                data-ar="اختر الأقرب. لا تقلق إذا لم تكن متأكداً!"></p>
+            <p class="step-desc" data-en="Pick the closest one. It's okay if you're not sure!"
+                data-ar="اختر الأقرب. لا مشكلة إذا لم تكن متأكداً!"></p>
 
             <div class="options-grid">
                 <div class="option-card" onclick="selectType(this, 'website')">
                     <div class="option-icon">🌐</div>
                     <div class="option-title" data-en="Website" data-ar="موقع ويب"></div>
-                    <div class="option-desc" data-en="Blog, shop, portfolio" data-ar="مدونة، متجر، معرض أعمال"></div>
+                    <div class="option-desc" data-en="Blog, store, portfolio" data-ar="مدونة، متجر، معرض أعمال"></div>
                 </div>
                 <div class="option-card" onclick="selectType(this, 'app')">
                     <div class="option-icon">📱</div>
                     <div class="option-title" data-en="Mobile App" data-ar="تطبيق جوال"></div>
-                    <div class="option-desc" data-en="iOS, Android app" data-ar="تطبيق iOS أو Android"></div>
+                    <div class="option-desc" data-en="iPhone, Android" data-ar="آيفون، أندرويد"></div>
                 </div>
                 <div class="option-card" onclick="selectType(this, 'desktop')">
                     <div class="option-icon">💻</div>
                     <div class="option-title" data-en="Desktop App" data-ar="برنامج كمبيوتر"></div>
-                    <div class="option-desc" data-en="Mac, Windows app" data-ar="برنامج Mac أو Windows"></div>
+                    <div class="option-desc" data-en="Mac, Windows" data-ar="ماك، ويندوز"></div>
                 </div>
                 <div class="option-card" onclick="selectType(this, 'other')">
                     <div class="option-icon">🤷</div>
                     <div class="option-title" data-en="Not Sure" data-ar="غير متأكد"></div>
-                    <div class="option-desc" data-en="That's okay!" data-ar="لا مشكلة!"></div>
+                    <div class="option-desc" data-en="That's fine!" data-ar="لا مشكلة!"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Step 4: Which AI tool? -->
-        <div class="card" id="step4">
+        <!-- Step 4 -->
+        <div class="card">
             <div class="step-header">
                 <div class="step-number">4</div>
-                <div class="step-title" data-en="Which AI tool do you use?" data-ar="أي أداة ذكاء اصطناعي تستخدم؟">
-                </div>
+                <div class="step-title" data-en="Which AI tool do you use?" data-ar="أي أداة AI تستخدم؟"></div>
             </div>
-            <p class="step-desc" data-en="Pick the one you code with. This helps us put the file in the right place."
-                data-ar="اختر الأداة التي تبرمج بها. هذا يساعدنا نضع الملف في المكان الصحيح."></p>
+            <p class="step-desc" data-en="This helps us put the file in the right place."
+                data-ar="هذا يساعدنا نضع الملف في المكان الصحيح."></p>
 
             <div class="options-grid">
                 <div class="option-card" onclick="selectIDE(this, 'cursor')">
@@ -409,8 +546,7 @@
             </div>
         </div>
 
-        <!-- Generate Button -->
-        <button class="primary" onclick="generate()" id="generateBtn" data-en="✨ Create My Guardian File"
+        <button class="primary" onclick="generate()" data-en="✨ Create My Guardian File"
             data-ar="✨ أنشئ ملف Guardian"></button>
 
         <!-- Result -->
@@ -428,17 +564,28 @@
                 </div>
                 <div class="instruction-step">
                     <div class="instruction-num">2</div>
-                    <div><span data-en="Put it in this folder:" data-ar="ضعه في هذا المجلد:"></span>
+                    <div>
+                        <span data-en="Put it in this folder in your project:"
+                            data-ar="ضعه في هذا المجلد في مشروعك:"></span>
                         <div class="path-display" id="pathDisplay"></div>
                     </div>
                 </div>
                 <div class="instruction-step">
                     <div class="instruction-num">3</div>
-                    <div data-en="Open your project and start chatting with your AI!"
-                        data-ar="افتح مشروعك وابدأ المحادثة مع الوكيل!"></div>
+                    <div data-en="Start chatting with your AI - it will remember everything!"
+                        data-ar="ابدأ المحادثة مع الوكيل - سيتذكر كل شيء!"></div>
                 </div>
             </div>
         </div>
+
+        <footer>
+            <img src="logo.jpg" alt="Imperfect Success">
+            <div>No Medals. Just Real Progress.</div>
+            <div style="margin-top: 0.5rem;">
+                <a href="https://imperfectsuccess.com"
+                    style="color: var(--accent); text-decoration: none;">imperfectsuccess.com</a>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -465,13 +612,13 @@
         }
 
         function selectType(el, type) {
-            document.querySelectorAll('#step3 .option-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('#step3 .option-card, .card:nth-child(5) .option-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
             selectedType = type;
         }
 
         function selectIDE(el, ide) {
-            document.querySelectorAll('#step4 .option-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.card:nth-child(6) .option-card, .card:last-of-type .option-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
             selectedIDE = ide;
         }
@@ -481,9 +628,8 @@
             const purpose = document.getElementById('projectPurpose').value || 'My awesome project';
             const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
 
-            // Simple type mapping
             const typeMap = {
-                'website': 'frontend: Web',
+                'website': 'frontend: Website',
                 'app': 'frontend: Mobile App',
                 'desktop': 'frontend: Desktop App',
                 'other': '# Will be detected automatically'
@@ -493,8 +639,8 @@
                 'cursor': '.cursor/rules/',
                 'windsurf': '.windsurf/rules/',
                 'vscode': '.github/',
-                'claude': '(project root)',
-                '': '(your project folder)'
+                'claude': '(project root)/',
+                '': '(your project folder)/'
             };
 
             const fileMap = {
@@ -517,50 +663,66 @@ alwaysApply: true
 
 ---
 
-## 📋 SIMPLE RULES
+## 📋 RULES FOR AI
 
-| Before doing anything | Do this |
-|-----------------------|---------|
+| Before doing anything | You must |
+|-----------------------|----------|
 | Creating a new file | Ask: "Does a similar file exist?" |
 | Changing something | Ask: "Will this break anything?" |
-| Not sure | Ask: "What do you mean?" |
+| Not sure what user wants | Ask: "What exactly do you mean?" |
 
 ---
 
-## 🏗️ PROJECT TYPE
+## 🏗️ PROJECT INFO
 \`\`\`yaml
 ${typeMap[selectedType] || typeMap['other']}
+purpose: ${purpose}
 \`\`\`
 
 ---
 
 ## 📂 IMPORTANT FILES
 \`\`\`yaml
-# Add your important files here
-# Example: src/main.js: main-file
+# Add your important files here later
+# Example: 
+# main.js: main-file
+# styles.css: styling
 \`\`\`
 
 ---
 
-## 🔒 DON'T CHANGE
+## 🔒 DO NOT CHANGE
 \`\`\`yaml
-# List things the AI should never change
-# Example: - Don't change the database
+# Things the AI should NEVER change without asking
+# Example:
+# - database-config
+# - payment-settings
 \`\`\`
 
 ---
 
-## ⚠️ BE CAREFUL
+## ⚠️ BE CAREFUL WITH
 \`\`\`yaml
-# List sensitive files
-# Example: - config.js: has passwords
+# Sensitive files that need extra care
+# Example:
+# - config.js: contains API keys
+\`\`\`
+
+---
+
+## 💡 REMEMBER
+\`\`\`yaml
+# Important notes for the AI
+# Example:
+# - Always use Arabic for user messages
+# - Test before saying "done"
 \`\`\`
 
 ---
 
 ## 📝 HISTORY
 \`\`\`yaml
-- ${timestamp}: Created with Guardian-H web generator
+- ${timestamp}: Created with Guardian-H
 \`\`\`
 `;
 
@@ -582,7 +744,6 @@ ${typeMap[selectedType] || typeMap['other']}
             URL.revokeObjectURL(url);
         }
 
-        // Initialize
         setLang('en');
     </script>
 </body>
