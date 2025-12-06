@@ -135,98 +135,74 @@ class GuardianScanner {
             } catch (e) { }
         }
 
-        // Check ALL Python dependency files
+        // ====================================
+        // READ ALL DEPENDENCIES - NO FILTERING
+        // Guardian-H = Memory layer, not opinions
+        // ====================================
+
+        // Python dependency files
         const pythonDepFiles = [
             'requirements.txt',
             'requirements-dev.txt',
             'requirements_dev.txt',
             'requirements.in',
-            'dev-requirements.txt',
-            'pyproject.toml',
-            'setup.py',
-            'setup.cfg'
+            'dev-requirements.txt'
         ];
 
-        let pythonDepsContent = '';
+        const pythonDeps = [];
         for (const depFile of pythonDepFiles) {
             const depPath = path.join(this.projectPath, depFile);
             if (fs.existsSync(depPath)) {
                 try {
-                    pythonDepsContent += fs.readFileSync(depPath, 'utf8').toLowerCase() + '\n';
+                    const content = fs.readFileSync(depPath, 'utf8');
+                    for (const line of content.split('\n')) {
+                        const trimmed = line.trim();
+                        // Skip comments and empty lines
+                        if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('-')) {
+                            pythonDeps.push(trimmed);
+                        }
+                    }
+                    stack.source_file = depFile;
                 } catch (e) { }
             }
         }
 
-        if (pythonDepsContent) {
-            // Detect Python framework - priority order
-            if (pythonDepsContent.includes('streamlit')) {
-                stack.frontend = 'Streamlit';
-                stack.backend = 'Python';
-            } else if (pythonDepsContent.includes('fastapi')) {
-                stack.backend = 'FastAPI';
-            } else if (pythonDepsContent.includes('django')) {
-                stack.backend = 'Django';
-            } else if (pythonDepsContent.includes('flask')) {
-                stack.backend = 'Flask';
-            } else {
-                stack.backend = 'Python';
-            }
-
-            // Detect AI/ML libraries
-            if (pythonDepsContent.includes('openai')) stack.ai = 'OpenAI';
-            if (pythonDepsContent.includes('langchain')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'LangChain';
-            if (pythonDepsContent.includes('anthropic')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'Anthropic';
-
-            // Detect data processing
-            const dataLibs = [];
-            if (pythonDepsContent.includes('polars')) dataLibs.push('Polars');
-            if (pythonDepsContent.includes('pandas')) dataLibs.push('Pandas');
-            if (pythonDepsContent.includes('pyarrow')) dataLibs.push('PyArrow');
-            if (pythonDepsContent.includes('duckdb')) dataLibs.push('DuckDB');
-            if (pythonDepsContent.includes('numpy')) dataLibs.push('NumPy');
-            if (dataLibs.length > 0) stack.data = dataLibs.join(', ');
-
-            // Detect database
-            if (pythonDepsContent.includes('sqlalchemy')) stack.database = 'SQLAlchemy';
-            else if (pythonDepsContent.includes('pymongo')) stack.database = 'MongoDB';
-            else if (pythonDepsContent.includes('psycopg')) stack.database = 'PostgreSQL';
-            else if (pythonDepsContent.includes('mysql')) stack.database = 'MySQL';
-            else if (pythonDepsContent.includes('duckdb')) stack.database = 'DuckDB';
-
-            // Detect testing
-            const testLibs = [];
-            if (pythonDepsContent.includes('pytest')) testLibs.push('pytest');
-            if (pythonDepsContent.includes('ruff')) testLibs.push('ruff');
-            if (pythonDepsContent.includes('mypy')) testLibs.push('mypy');
-            if (testLibs.length > 0) stack.testing = testLibs.join(', ');
+        // pyproject.toml
+        const pyprojectPath = path.join(this.projectPath, 'pyproject.toml');
+        if (fs.existsSync(pyprojectPath)) {
+            try {
+                const content = fs.readFileSync(pyprojectPath, 'utf8');
+                // Extract dependencies from pyproject.toml
+                const depMatch = content.match(/dependencies\s*=\s*\[([\s\S]*?)\]/);
+                if (depMatch) {
+                    const deps = depMatch[1].match(/"([^"]+)"/g);
+                    if (deps) {
+                        deps.forEach(d => pythonDeps.push(d.replace(/"/g, '')));
+                    }
+                }
+                if (!stack.source_file) stack.source_file = 'pyproject.toml';
+            } catch (e) { }
         }
 
-        // Check for .py files with Streamlit imports (fallback)
-        if (!stack.frontend) {
-            const pyFiles = this._findFiles(this.projectPath, '.py');
-            for (const pyFile of pyFiles.slice(0, 10)) {
-                try {
-                    const content = fs.readFileSync(pyFile, 'utf8');
-                    if (content.includes('import streamlit') || content.includes('from streamlit')) {
-                        stack.frontend = 'Streamlit';
-                        stack.backend = 'Python';
-                        break;
-                    }
-                    if (content.includes('from fastapi') || content.includes('import fastapi')) {
-                        stack.backend = 'FastAPI';
-                        break;
-                    }
-                } catch (e) { }
-            }
+        if (pythonDeps.length > 0) {
+            stack.language = 'Python';
+            stack.dependencies = pythonDeps.slice(0, 50); // Limit to 50
         }
 
-        // Check for database files
-        if (!stack.database) {
-            if (this._findFiles(this.projectPath, '.db').length > 0 ||
-                this._findFiles(this.projectPath, '.sqlite').length > 0 ||
-                this._findFiles(this.projectPath, '.sqlite3').length > 0) {
-                stack.database = 'SQLite';
-            }
+        // Node.js dependencies (already in package.json detection above)
+        // Just mark if it's a Node project
+        if (Object.keys(stack).length === 0 || stack.frontend) {
+            // Already detected from package.json
+        }
+
+        // Check for database files (just note they exist)
+        const dbFiles = [
+            ...this._findFiles(this.projectPath, '.db'),
+            ...this._findFiles(this.projectPath, '.sqlite'),
+            ...this._findFiles(this.projectPath, '.sqlite3')
+        ];
+        if (dbFiles.length > 0) {
+            stack.has_database = true;
         }
 
         this.snapshot.tech_stack = stack;
