@@ -12,7 +12,7 @@
 
 **Q: How do I install Guardian?**
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 **Q: What if I don't have Python?**
@@ -61,7 +61,7 @@ The scanner only reads common code extensions (.py, .js, .jsx, .ts, .tsx). Add o
 
 **س: كيف أثبّت Guardian؟**
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 **س: ماذا لو لم يكن عندي Python؟**

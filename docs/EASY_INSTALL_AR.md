@@ -7,7 +7,7 @@
 افتح Terminal في مجلد مشروعك واكتب:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 **هذا سيقوم بـ:**
@@ -23,7 +23,7 @@ curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/inst
 افتح محادثة مع الوكيل (Cursor, Windsurf, إلخ) واكتب:
 
 ```
-Install Guardian-H from: github.com/Haithamhaj/project-guardian
+Install Guardian-H from: github.com/Haithamhaj/guardian-h
 ```
 
 الوكيل سيقرأ AGENT_INSTALL.md ويثبت Guardian تلقائياً.

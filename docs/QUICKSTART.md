@@ -4,7 +4,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Haithamhaj/project-guardian.git
+git clone https://github.com/Haithamhaj/guardian-h.git
 
 # Navigate to your project
 cd /your/project
