@@ -736,6 +736,10 @@ code_quality:
   performance: Measure first, optimize later
   extensibility: Small functions, DI
   simplicity: KISS, YAGNI, DRY
+  structure:
+    - Modularize: File < 300 lines, Func < 50 lines
+    - Anchors: Use docstrings & regions
+    - Naming: Descriptive filenames
 
 if_confused: ASK "هل تقصد X أم Y؟"
 ```
