@@ -21,11 +21,20 @@ GUARDIAN_URL="https://raw.githubusercontent.com/Haithamhaj/guardian-h/main"
 echo "📥 Downloading Guardian scanner..."
 mkdir -p .guardian
 curl -sL "$GUARDIAN_URL/src/guardian_scanner.py" -o .guardian/scanner.py
-curl -sL "$GUARDIAN_URL/templates/guardian-v4.mdc" -o .guardian/template.mdc
+curl -sL "$GUARDIAN_URL/templates/guardian.mdc" -o .guardian/template.mdc
 
 # Check if Python is available
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Python3 is not installed. Please install Python first."
+    echo ""
+    echo "❌ Python3 غير مثبت على جهازك"
+    echo ""
+    echo "💡 لتثبيت Python:"
+    echo "   - Mac: brew install python3"
+    echo "   - Windows: قم بتحميله من python.org"
+    echo "   - Linux: sudo apt install python3"
+    echo ""
+    echo "بعد التثبيت، أعد تشغيل هذا الأمر."
+    rm -rf .guardian
     exit 1
 fi
 

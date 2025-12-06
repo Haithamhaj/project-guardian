@@ -1,6 +1,6 @@
 {
   "name": "guardian-h",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "🛡️ Guardian-H - Your AI Agent's Memory System",
   "bin": {
     "guardian-h": "./bin/create-guardian.js"
