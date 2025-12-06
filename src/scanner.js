@@ -481,7 +481,7 @@ class GuardianScanner {
         this.snapshot.run = run;
     }
 
-    generateLiteMdc() {
+    generateMdc() {
         const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
 
         // Build tech stack
@@ -610,7 +610,7 @@ if_confused: ASK "هل تقصد X أم Y؟"
             outputPath = path.join(this.projectPath, 'guardian.mdc');
         }
 
-        const content = this.generateLiteMdc();
+        const content = this.generateMdc();
         fs.writeFileSync(outputPath, content, 'utf8');
         console.log(`✅ Saved: ${outputPath}`);
         return outputPath;

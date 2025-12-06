@@ -51,7 +51,7 @@ async function main() {
   const snapshot = scanner.scan();
 
   // Generate and save the MDC file
-  const guardianContent = scanner.generateLiteMdc();
+  const guardianContent = scanner.generateMdc();
   const guardianFile = path.join(projectPath, 'guardian.mdc');
 
   // Detect IDE and determine destination

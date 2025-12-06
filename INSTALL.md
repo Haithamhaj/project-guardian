@@ -22,12 +22,12 @@ npx guardian-h
 **المتطلبات:** Terminal فقط (لا Node.js، لا Python)
 
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install-lite.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 أو للتحميل أولاً:
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install-lite.sh -o install.sh
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh -o install.sh
 chmod +x install.sh
 ./install.sh
 ```
@@ -72,7 +72,7 @@ chmod +x install.sh
 npx guardian-h
 
 # أو Bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install-lite.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 ---

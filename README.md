@@ -79,7 +79,7 @@ npx guardian-h
 
 ### 🐧 Method 2: Bash Script (No Node.js needed!)
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install-lite.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 **Requirements:** Terminal only (Mac/Linux)
 
@@ -183,7 +183,7 @@ Re-scan your project after major changes:
 npx guardian-h
 
 # Using Bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install-lite.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 ---
@@ -212,7 +212,7 @@ npx guardian-h
 
 ### 🐧 الطريقة 2: سكربت Bash (لا يحتاج Node.js!)
 ```bash
-curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install-lite.sh | bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/install.sh | bash
 ```
 
 ### 🌐 الطريقة 3: مولد الويب (لا يحتاج تثبيت!)
