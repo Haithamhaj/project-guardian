@@ -624,6 +624,124 @@ optional:
 """
         return mdc
     
+    def generate_lite_mdc(self) -> str:
+        """Generate compact, AI-optimized MDC format."""
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+        
+        # Build tech stack
+        tech_str = '\n'.join(f"  {k}: {v}" for k, v in self.snapshot['tech_stack'].items())
+        
+        # Build files (compact format)
+        files_str = ""
+        for path, info in sorted(self.snapshot['files'].items())[:50]:  # Limit to 50
+            files_str += f"  {path}: {info['purpose']}\n"
+        
+        # Build connections
+        conn_str = ""
+        for port, file in self.snapshot['connections'].items():
+            conn_str += f"  port_{port}: {file}\n"
+        
+        mdc = f"""---
+description: 🛡️ GUARDIAN - Read BEFORE any action
+globs: **/*
+alwaysApply: true
+---
+
+# 🛡️ {self.snapshot['identity']['name']} GUARDIAN
+> Auto-synced: {timestamp}
+
+---
+
+## 📋 RULES (Decision Table)
+
+| Action | Check | Do |
+|--------|-------|-----|
+| Create file | `FILES` has similar? | → ASK user first |
+| Modify file | In `DANGER`? | → WARN before proceed |
+| Change config | In `LOCKED`? | → STOP, ask approval |
+| Any change | - | → TEST then UPDATE |
+
+---
+
+## ⚡ QUICK_RULES
+```yaml
+before_action:
+  1: Read this file
+  2: Check FILES section
+  3: Check DANGER section
+  4: If unclear → ASK user
+
+after_action:
+  1: Test the change
+  2: Update CHANGES section
+  3: Show proof of success
+```
+
+---
+
+## 🏗️ TECH_STACK
+```yaml
+# ❌ DO NOT SUGGEST ALTERNATIVES
+{tech_str if tech_str else '  # Not detected'}
+```
+
+---
+
+## 📂 FILES
+```yaml
+# CHECK before creating
+{files_str if files_str else '  # No files detected'}
+```
+
+---
+
+## 🔌 CONNECTIONS
+```yaml
+{conn_str if conn_str else '  # No connections detected'}
+```
+
+---
+
+## 🔒 LOCKED
+```yaml
+# CANNOT change without user approval
+  # Add locked decisions here
+```
+
+---
+
+## ⚠️ DANGER
+```yaml
+# WARN before touching
+  # Add dangerous files here
+```
+
+---
+
+## 📝 CHANGES
+```yaml
+- {timestamp}: Initial Guardian scan
+```
+
+---
+
+## 🧠 THINKING
+```yaml
+problem_solving:
+  1: Read error → Trace flow → Find root cause
+  2: Check FILES → Check DANGER → Design solution
+  3: One change → Test → Confirm → Show proof
+
+code_quality:
+  performance: Measure first, optimize later
+  extensibility: Small functions, DI
+  simplicity: KISS, YAGNI, DRY
+
+if_confused: ASK "هل تقصد X أم Y؟"
+```
+"""
+        return mdc
+    
     def save(self, output_path: Optional[str] = None) -> str:
         """Save the generated MDC file."""
         if output_path is None:
