@@ -572,8 +572,8 @@
             </div>
         </div>
 
-        <button class="primary" onclick="generate()" data-en="✨ Create My Guardian File"
-            data-ar="✨ أنشئ ملف Guardian"></button>
+        <button class="primary" onclick="generate()" data-en="✨ Create My Guardian File" data-ar="✨ أنشئ ملف Guardian">✨
+            Create My Guardian File</button>
 
         <!-- Result -->
         <div class="output-card hidden" id="result">
@@ -774,7 +774,15 @@ purpose: ${purpose}
             URL.revokeObjectURL(url);
         }
 
-        setLang('en');
+        // Initialize after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            setLang('en');
+        });
+
+        // Also run immediately if DOM already loaded
+        if (document.readyState !== 'loading') {
+            setLang('en');
+        }
     </script>
 </body>
 
