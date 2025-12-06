@@ -208,21 +208,24 @@ class ChangeClassifier:
     }
     
     # Keywords for classification
+    # Priority: UI_STYLE > UI_BEHAVIOUR > NEW_FEATURE (for safety)
+    
     UI_STYLE_KEYWORDS = [
-        'color', 'لون', 'size', 'حجم', 'font', 'خط', 'spacing', 'padding',
+        'color', 'لون', 'colour', 'size', 'حجم', 'font', 'خط', 'spacing', 'padding',
         'margin', 'text', 'نص', 'bigger', 'أكبر', 'smaller', 'أصغر',
-        'style', 'css', 'align', 'محاذاة'
+        'style', 'css', 'align', 'محاذاة', 'blue', 'أزرق', 'red', 'أحمر'
     ]
     
     UI_BEHAVIOUR_KEYWORDS = [
-        'click', 'button', 'زر', 'enable', 'disable', 'show', 'hide',
         'toast', 'message', 'رسالة', 'validation', 'تحقق', 'error', 'خطأ',
-        'when', 'if', 'condition', 'شرط'
+        'condition', 'شرط', 'نجاح', 'success', 'alert', 'تنبيه',
+        'enable', 'disable', 'show', 'hide', 'when', 'if', 'عندما'
     ]
     
     NEW_FEATURE_KEYWORDS = [
-        'add', 'أضف', 'new', 'جديد', 'create', 'إنشاء', 'page', 'صفحة',
-        'screen', 'شاشة', 'feature', 'ميزة', 'system', 'نظام', 'integration'
+        'page', 'صفحة', 'screen', 'شاشة', 'feature', 'ميزة', 
+        'system', 'نظام', 'integration', 'dashboard', 'لوحة',
+        'authentication', 'auth', 'login', 'تسجيل'
     ]
     
     @classmethod
@@ -235,20 +238,25 @@ class ChangeClassifier:
         ui_behaviour_score = sum(1 for kw in cls.UI_BEHAVIOUR_KEYWORDS if kw in request_lower)
         new_feature_score = sum(1 for kw in cls.NEW_FEATURE_KEYWORDS if kw in request_lower)
         
-        # Determine classification
-        if new_feature_score > 0 and (new_feature_score >= ui_style_score and new_feature_score >= ui_behaviour_score):
-            classification = 'NEW_FEATURE_FLOW'
-        elif ui_behaviour_score > ui_style_score:
-            classification = 'UI_BEHAVIOUR_TWEAK'
-        elif ui_style_score > 0:
+        # Priority-based classification:
+        # 1. UI_STYLE wins if any style keyword present (safest change)
+        # 2. NEW_FEATURE wins if new feature keywords present (page, screen, etc.)
+        # 3. UI_BEHAVIOUR wins if any behaviour keyword present
+        # 4. Default to UI_BEHAVIOUR (safer than NEW_FEATURE)
+        
+        if ui_style_score > 0:
             classification = 'PURE_UI_STYLE'
+        elif new_feature_score > 0:
+            classification = 'NEW_FEATURE_FLOW'
+        elif ui_behaviour_score > 0:
+            classification = 'UI_BEHAVIOUR_TWEAK'
         else:
             # Default to behaviour tweak for unknown
             classification = 'UI_BEHAVIOUR_TWEAK'
         
         return {
             'classification': classification,
-            'confidence': max(ui_style_score, ui_behaviour_score, new_feature_score) / 3,
+            'confidence': max(ui_style_score, ui_behaviour_score, new_feature_score, 1) / 3,
             **cls.CLASSIFICATIONS[classification]
         }
 
