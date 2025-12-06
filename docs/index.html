@@ -392,8 +392,8 @@
             <ul class="solution-list">
                 <li>
                     <span class="solution-icon">✓</span>
-                    <span data-en="Remembers your project details forever" data-ar="يتذكر تفاصيل مشروعك للأبد">Remembers
-                        your project details forever</span>
+                    <span data-en="Remembers your project across all sessions"
+                        data-ar="يتذكر مشروعك في كل جلسة">Remembers your project across all sessions</span>
                 </li>
                 <li>
                     <span class="solution-icon">✓</span>
@@ -561,6 +561,14 @@
                     <div class="option-icon">🧠</div>
                     <div class="option-title">Claude</div>
                 </div>
+                <div class="option-card" onclick="selectIDE(this, 'antigravity')">
+                    <div class="option-icon">🚀</div>
+                    <div class="option-title">Antigravity</div>
+                </div>
+                <div class="option-card" onclick="selectIDE(this, 'other')">
+                    <div class="option-icon">🔧</div>
+                    <div class="option-title" data-en="Other" data-ar="أخرى">Other</div>
+                </div>
             </div>
         </div>
 
@@ -658,6 +666,8 @@
                 'windsurf': '.windsurf/rules/',
                 'vscode': '.github/',
                 'claude': '(project root)/',
+                'antigravity': '.gemini/',
+                'other': '(your project folder)/',
                 '': '(your project folder)/'
             };
 
@@ -666,6 +676,8 @@
                 'windsurf': 'guardian.md',
                 'vscode': 'copilot-instructions.md',
                 'claude': 'CLAUDE.md',
+                'antigravity': 'guardian.mdc',
+                'other': 'guardian.mdc',
                 '': 'guardian.mdc'
             };
 
