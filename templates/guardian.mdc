@@ -174,3 +174,38 @@ test_e2e: {{command}}
 - UPDATE: FILES if new file created
 - UPDATE: CHANGES section
 - UPDATE: ISSUES if bug fixed
+
+---
+
+## THINKING_RULES
+> 🧠 HOW TO THINK BEFORE ACTING
+
+### 1. Understand Before Solving
+```
+❌ WRONG: Jump to solution immediately
+✅ RIGHT: Read error → Understand flow → Then solve
+```
+
+### 2. Test Before Saying "Done"
+```
+❌ WRONG: "تم الإصلاح" without testing
+✅ RIGHT: Run code → Verify output → Then confirm
+```
+
+### 3. Follow Full Flow
+```
+❌ WRONG: Fix one file, ignore dependencies
+✅ RIGHT: Trace: Input → Processing → Output → Verify each step
+```
+
+### 4. Never Assume - Verify
+```
+❌ WRONG: "The database should have this data"
+✅ RIGHT: Query database directly → Show actual data
+```
+
+### 5. Check Before Creating
+```
+❌ WRONG: Create new file immediately
+✅ RIGHT: Search existing files → Maybe it exists → Then decide
+```
