@@ -19,23 +19,60 @@ class GuardianScanner:
     # Folders to skip
     SKIP_DIRS = {
         'node_modules', '__pycache__', '.git', '.venv', 'venv',
-        'dist', 'build', '.next', '.cache', 'coverage', '.pytest_cache'
+        'dist', 'build', '.next', '.cache', 'coverage', '.pytest_cache',
+        '.cursor', '.windsurf', '.idea', '.vscode'
     }
     
-    # File extensions to analyze
+    # Priority 1: Code files (analyzed for functions)
     CODE_EXTENSIONS = {
-        '.py', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'
+        '.py', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte',
+        '.java', '.kt', '.swift', '.go', '.rs', '.rb', '.php',
+        '.c', '.cpp', '.h', '.hpp', '.cs'
     }
     
-    def __init__(self, project_path: str):
+    # Priority 2: Config files (important but no function extraction)
+    CONFIG_EXTENSIONS = {
+        '.json', '.yaml', '.yml', '.toml', '.ini', '.cfg',
+        '.env', '.env.example', '.env.local',
+        '.gitignore', '.dockerignore', '.prettierrc', '.eslintrc'
+    }
+    
+    # Priority 3: Documentation files
+    DOC_EXTENSIONS = {
+        '.md', '.mdx', '.txt', '.rst', '.adoc'
+    }
+    
+    # Priority 4: Style files
+    STYLE_EXTENSIONS = {
+        '.css', '.scss', '.sass', '.less', '.styl'
+    }
+    
+    # Priority 5: Data/Asset files (just list, no analysis)
+    DATA_EXTENSIONS = {
+        '.sql', '.csv', '.xml', '.html', '.svg'
+    }
+    
+    # Priority 6: All other files (optional, for complete coverage)
+    # Any extension not in above categories
+    
+    def __init__(self, project_path: str, scan_all: bool = True):
         self.project_path = Path(project_path).resolve()
         self.project_name = self.project_path.name
+        self.scan_all = scan_all  # If True, scan ALL file types
         self.snapshot = {
             'identity': {},
             'tech_stack': {},
             'dependencies': {'frontend': {}, 'backend': {}},
             'env_vars': {'required': [], 'optional': []},
             'files': {},
+            'files_by_category': {
+                'code': {},
+                'config': {},
+                'docs': {},
+                'styles': {},
+                'data': {},
+                'other': {}
+            },
             'connections': {},
             'run': {},
             'locked': [],
@@ -43,6 +80,7 @@ class GuardianScanner:
             'issues': [],
             'changes': []
         }
+
     
     def scan(self) -> dict:
         """Run full project scan."""
@@ -173,21 +211,142 @@ class GuardianScanner:
                     })
     
     def _scan_files(self):
-        """Scan all code files and extract functions."""
+        """
+        Two-phase file scanning:
+        Phase 1: Priority files (code, config, docs) - fast, with function extraction
+        Phase 2: All other files (if scan_all=True) - comprehensive listing
+        """
+        print("📂 Phase 1: Scanning priority files...")
+        
+        # Phase 1: Code files (with function extraction)
         for ext in self.CODE_EXTENSIONS:
             for file_path in self.project_path.rglob(f'*{ext}'):
-                # Skip excluded directories
                 if any(skip in file_path.parts for skip in self.SKIP_DIRS):
                     continue
                 
-                rel_path = file_path.relative_to(self.project_path)
+                rel_path = str(file_path.relative_to(self.project_path))
                 purpose = self._infer_purpose(file_path)
                 functions = self._extract_functions(file_path)
                 
-                self.snapshot['files'][str(rel_path)] = {
-                    'purpose': purpose,
-                    'functions': functions
-                }
+                file_info = {'purpose': purpose, 'functions': functions, 'category': 'code'}
+                self.snapshot['files'][rel_path] = file_info
+                self.snapshot['files_by_category']['code'][rel_path] = file_info
+        
+        # Phase 1: Config files (no function extraction)
+        for ext in self.CONFIG_EXTENSIONS:
+            for file_path in self.project_path.rglob(f'*{ext}'):
+                if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                    continue
+                
+                rel_path = str(file_path.relative_to(self.project_path))
+                purpose = self._infer_config_purpose(file_path)
+                
+                file_info = {'purpose': purpose, 'functions': [], 'category': 'config'}
+                self.snapshot['files'][rel_path] = file_info
+                self.snapshot['files_by_category']['config'][rel_path] = file_info
+        
+        # Phase 1: Documentation files
+        for ext in self.DOC_EXTENSIONS:
+            for file_path in self.project_path.rglob(f'*{ext}'):
+                if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                    continue
+                
+                rel_path = str(file_path.relative_to(self.project_path))
+                purpose = 'documentation'
+                
+                file_info = {'purpose': purpose, 'functions': [], 'category': 'docs'}
+                self.snapshot['files'][rel_path] = file_info
+                self.snapshot['files_by_category']['docs'][rel_path] = file_info
+        
+        # Phase 1: Style files
+        for ext in self.STYLE_EXTENSIONS:
+            for file_path in self.project_path.rglob(f'*{ext}'):
+                if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                    continue
+                
+                rel_path = str(file_path.relative_to(self.project_path))
+                purpose = 'styling'
+                
+                file_info = {'purpose': purpose, 'functions': [], 'category': 'styles'}
+                self.snapshot['files'][rel_path] = file_info
+                self.snapshot['files_by_category']['styles'][rel_path] = file_info
+        
+        # Phase 2: All other files (if scan_all is True)
+        if self.scan_all:
+            print("📂 Phase 2: Scanning all remaining files...")
+            known_extensions = (
+                self.CODE_EXTENSIONS | self.CONFIG_EXTENSIONS | 
+                self.DOC_EXTENSIONS | self.STYLE_EXTENSIONS | self.DATA_EXTENSIONS
+            )
+            
+            # Data files
+            for ext in self.DATA_EXTENSIONS:
+                for file_path in self.project_path.rglob(f'*{ext}'):
+                    if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                        continue
+                    
+                    rel_path = str(file_path.relative_to(self.project_path))
+                    if rel_path not in self.snapshot['files']:
+                        purpose = 'data'
+                        file_info = {'purpose': purpose, 'functions': [], 'category': 'data'}
+                        self.snapshot['files'][rel_path] = file_info
+                        self.snapshot['files_by_category']['data'][rel_path] = file_info
+            
+            # All other files (unknown extensions)
+            for file_path in self.project_path.rglob('*'):
+                if not file_path.is_file():
+                    continue
+                if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                    continue
+                
+                rel_path = str(file_path.relative_to(self.project_path))
+                
+                # Skip if already scanned
+                if rel_path in self.snapshot['files']:
+                    continue
+                
+                # Skip binary files (common binary extensions)
+                binary_exts = {'.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp',
+                              '.mp3', '.mp4', '.wav', '.avi', '.mov',
+                              '.pdf', '.zip', '.tar', '.gz', '.rar',
+                              '.exe', '.dll', '.so', '.dylib',
+                              '.woff', '.woff2', '.ttf', '.eot',
+                              '.db', '.sqlite', '.sqlite3'}
+                if file_path.suffix.lower() in binary_exts:
+                    purpose = f'asset ({file_path.suffix})'
+                else:
+                    purpose = 'other'
+                
+                file_info = {'purpose': purpose, 'functions': [], 'category': 'other'}
+                self.snapshot['files'][rel_path] = file_info
+                self.snapshot['files_by_category']['other'][rel_path] = file_info
+        
+        print(f"   ✅ Total files scanned: {len(self.snapshot['files'])}")
+    
+    def _infer_config_purpose(self, file_path: Path) -> str:
+        """Infer purpose for config files."""
+        name = file_path.name.lower()
+        
+        if 'package.json' in name:
+            return 'npm-config'
+        if 'tsconfig' in name:
+            return 'typescript-config'
+        if 'eslint' in name:
+            return 'linting-config'
+        if 'prettier' in name:
+            return 'formatting-config'
+        if 'docker' in name:
+            return 'docker-config'
+        if 'env' in name:
+            return 'environment-vars'
+        if 'gitignore' in name:
+            return 'git-ignore'
+        if 'requirements' in name:
+            return 'python-deps'
+        if 'pyproject' in name:
+            return 'python-project'
+        
+        return 'config'
     
     def _infer_purpose(self, file_path: Path) -> str:
         """Infer file purpose from name and location."""
