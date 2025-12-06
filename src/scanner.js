@@ -135,38 +135,70 @@ class GuardianScanner {
             } catch (e) { }
         }
 
-        // Check requirements.txt for Python projects
-        const reqPath = path.join(this.projectPath, 'requirements.txt');
-        if (fs.existsSync(reqPath)) {
-            try {
-                const content = fs.readFileSync(reqPath, 'utf8').toLowerCase();
+        // Check ALL Python dependency files
+        const pythonDepFiles = [
+            'requirements.txt',
+            'requirements-dev.txt',
+            'requirements_dev.txt',
+            'requirements.in',
+            'dev-requirements.txt',
+            'pyproject.toml',
+            'setup.py',
+            'setup.cfg'
+        ];
 
-                // Detect Python framework - priority order
-                if (content.includes('streamlit')) {
-                    stack.frontend = 'Streamlit';
-                    stack.backend = 'Python';
-                } else if (content.includes('fastapi')) {
-                    stack.backend = 'FastAPI';
-                } else if (content.includes('django')) {
-                    stack.backend = 'Django';
-                } else if (content.includes('flask')) {
-                    stack.backend = 'Flask';
-                } else {
-                    stack.backend = 'Python';
-                }
+        let pythonDepsContent = '';
+        for (const depFile of pythonDepFiles) {
+            const depPath = path.join(this.projectPath, depFile);
+            if (fs.existsSync(depPath)) {
+                try {
+                    pythonDepsContent += fs.readFileSync(depPath, 'utf8').toLowerCase() + '\n';
+                } catch (e) { }
+            }
+        }
 
-                // Detect AI/ML libraries
-                if (content.includes('openai')) stack.ai = 'OpenAI';
-                if (content.includes('langchain')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'LangChain';
-                if (content.includes('anthropic')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'Anthropic';
+        if (pythonDepsContent) {
+            // Detect Python framework - priority order
+            if (pythonDepsContent.includes('streamlit')) {
+                stack.frontend = 'Streamlit';
+                stack.backend = 'Python';
+            } else if (pythonDepsContent.includes('fastapi')) {
+                stack.backend = 'FastAPI';
+            } else if (pythonDepsContent.includes('django')) {
+                stack.backend = 'Django';
+            } else if (pythonDepsContent.includes('flask')) {
+                stack.backend = 'Flask';
+            } else {
+                stack.backend = 'Python';
+            }
 
-                // Detect database
-                if (content.includes('sqlalchemy')) stack.database = 'SQLAlchemy';
-                else if (content.includes('pymongo')) stack.database = 'MongoDB';
-                else if (content.includes('psycopg')) stack.database = 'PostgreSQL';
-                else if (content.includes('mysql')) stack.database = 'MySQL';
+            // Detect AI/ML libraries
+            if (pythonDepsContent.includes('openai')) stack.ai = 'OpenAI';
+            if (pythonDepsContent.includes('langchain')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'LangChain';
+            if (pythonDepsContent.includes('anthropic')) stack.ai = (stack.ai ? stack.ai + ' + ' : '') + 'Anthropic';
 
-            } catch (e) { }
+            // Detect data processing
+            const dataLibs = [];
+            if (pythonDepsContent.includes('polars')) dataLibs.push('Polars');
+            if (pythonDepsContent.includes('pandas')) dataLibs.push('Pandas');
+            if (pythonDepsContent.includes('pyarrow')) dataLibs.push('PyArrow');
+            if (pythonDepsContent.includes('duckdb')) dataLibs.push('DuckDB');
+            if (pythonDepsContent.includes('numpy')) dataLibs.push('NumPy');
+            if (dataLibs.length > 0) stack.data = dataLibs.join(', ');
+
+            // Detect database
+            if (pythonDepsContent.includes('sqlalchemy')) stack.database = 'SQLAlchemy';
+            else if (pythonDepsContent.includes('pymongo')) stack.database = 'MongoDB';
+            else if (pythonDepsContent.includes('psycopg')) stack.database = 'PostgreSQL';
+            else if (pythonDepsContent.includes('mysql')) stack.database = 'MySQL';
+            else if (pythonDepsContent.includes('duckdb')) stack.database = 'DuckDB';
+
+            // Detect testing
+            const testLibs = [];
+            if (pythonDepsContent.includes('pytest')) testLibs.push('pytest');
+            if (pythonDepsContent.includes('ruff')) testLibs.push('ruff');
+            if (pythonDepsContent.includes('mypy')) testLibs.push('mypy');
+            if (testLibs.length > 0) stack.testing = testLibs.join(', ');
         }
 
         // Check for .py files with Streamlit imports (fallback)
