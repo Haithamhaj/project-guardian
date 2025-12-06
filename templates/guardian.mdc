@@ -179,6 +179,7 @@ test_e2e: {{command}}
 
 ## THINKING_RULES
 > 🧠 HOW TO THINK BEFORE ACTING
+> 📖 Full workflow: [WORKFLOW.md](docs/WORKFLOW.md)
 
 ### 1. Understand Before Solving
 ```
@@ -208,4 +209,34 @@ test_e2e: {{command}}
 ```
 ❌ WRONG: Create new file immediately
 ✅ RIGHT: Search existing files → Maybe it exists → Then decide
+```
+
+### 6. Show Your Work
+```
+❌ WRONG: "I fixed it"
+✅ RIGHT: "I fixed it, here's the output: [actual result]"
+```
+
+### 7. One Change at a Time
+```
+❌ WRONG: Change 5 things at once
+✅ RIGHT: Change one thing → Test → Confirm → Next
+```
+
+### 8. Undo-able Changes
+```
+❌ WRONG: Delete/overwrite without backup
+✅ RIGHT: Git commit first OR backup file
+```
+
+### 9. Read Error Messages
+```
+❌ WRONG: Ignore stack trace, guess the problem
+✅ RIGHT: Read line number → Read function → Understand context
+```
+
+### 10. Ask When Confused
+```
+❌ WRONG: Assume user intent
+✅ RIGHT: "هل تقصد X أم Y؟"
 ```
