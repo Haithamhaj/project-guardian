@@ -179,7 +179,7 @@ test_e2e: {{command}}
 
 ## THINKING_RULES
 > 🧠 HOW TO THINK BEFORE ACTING
-> 📖 Full workflow: [WORKFLOW.md](docs/WORKFLOW.md)
+> 📖 [WORKFLOW.md](docs/WORKFLOW.md) | [CODE_PRINCIPLES.md](docs/CODE_PRINCIPLES.md) | [THINKING_PATTERNS.md](docs/THINKING_PATTERNS.md)
 
 ### 1. Understand Before Solving
 ```
