@@ -1,58 +1,56 @@
-# Contributing to Project Guardian
+# 🤝 Contributing to Project Guardian
+# المساهمة في مشروع Guardian
 
-First off, thank you for considering contributing! 🎉
-
-## How Can You Contribute?
-
-### 🐛 Reporting Bugs
-
-- Use GitHub Issues
-- Include: IDE used, OS, steps to reproduce
-- Screenshots help!
-
-### 💡 Suggesting Features
-
-- Open an issue with `[Feature]` prefix
-- Explain the use case
-- Bonus: Mock how it would work
-
-### 🔧 Code Contributions
-
-1. Fork the repo
-2. Create branch: `git checkout -b feature/amazing-feature`
-3. Make changes
-4. Test with at least one AI IDE
-5. Commit: `git commit -m 'Add amazing feature'`
-6. Push: `git push origin feature/amazing-feature`
-7. Open Pull Request
-
-### 📝 Documentation
-
-- Fix typos
-- Add examples
-- Translate to other languages
-- Improve clarity
-
-## Code Style
-
-- Keep it simple - users are non-technical
-- Comment in English
-- Test with Cursor (primary target)
-
-## Questions?
-
-Open an issue with `[Question]` prefix.
+[English](#english) | [العربية](#arabic)
 
 ---
 
-Thanks for helping make AI agents smarter! 🛡️
+<a name="english"></a>
+## 🇬🇧 English
+
+### How to Contribute
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m 'Add amazing feature'`
+4. **Push** to the branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
+
+### What We Need Help With
+
+- 🌍 **Translations** - Help translate to more languages
+- 🧪 **Testing** - Test on different projects and IDEs
+- 📝 **Documentation** - Improve docs and examples
+- 🐛 **Bug Reports** - Report issues you find
+- 💡 **Feature Ideas** - Suggest improvements
+
+### Code Style
+
+- Python: Follow PEP 8
+- JavaScript: Use ESLint defaults
+- Comments: Write in English
 
 ---
 
-<div align="center">
+<a name="arabic"></a>
+## 🇸🇦 العربية
 
-**A Product by [Imperfect Success](https://imperfectsuccess.com)**
+### كيف تساهم
 
-*No Medals. Just Real Progress.*
+1. **Fork** - انسخ المستودع
+2. **أنشئ** فرع جديد: `git checkout -b feature/amazing-feature`
+3. **Commit** تغييراتك: `git commit -m 'Add amazing feature'`
+4. **Push** للفرع: `git push origin feature/amazing-feature`
+5. **افتح** Pull Request
 
-</div>
+### نحتاج مساعدة في
+
+- 🌍 **الترجمة** - ساعد في ترجمة لغات أخرى
+- 🧪 **الاختبار** - اختبر على مشاريع و IDEs مختلفة
+- 📝 **التوثيق** - حسّن الوثائق والأمثلة
+- 🐛 **تقارير الأخطاء** - أبلغ عن المشاكل
+- 💡 **أفكار جديدة** - اقترح تحسينات
+
+---
+
+**Thank you for contributing! | شكراً لمساهمتك!**

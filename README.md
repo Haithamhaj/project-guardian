@@ -2,19 +2,23 @@
 
 # 🛡️ Project Guardian
 
-### Your AI Agent's Memory System
+### Your AI Agent's Memory System | نظام ذاكرة الوكيل الذكي
 
 **It discovers your project. It remembers everything. You never repeat yourself.**
 
-*No Medals. Just Real Progress.*
+**يكتشف مشروعك. يتذكر كل شيء. لا تكرر نفسك أبداً.**
 
-[[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://imperfectsuccess.com)
+
+[English](#english) | [العربية](#arabic)
+
+</div>
 
 ---
 
-</div>
+<a name="english"></a>
+# 🇬🇧 English Documentation
 
 ## 😤 The Problem
 
@@ -22,246 +26,239 @@ You're building with AI agents (Cursor, Windsurf, Copilot...) and this keeps hap
 
 ```
 You: "Change the button color"
-Agent: Creates 3 new files, refactors the component structure, adds a theme system
+Agent: Creates 3 new files, refactors everything
 
 You: "Fix the login bug"  
-Agent: Starts a new server on port 3000 (yours runs on 8765)
+Agent: Uses port 3000 (yours is 8765)
 
 You: "Add a toast message"
-Agent: Forgets your tech stack, suggests Vue (you use React)
-
-You: "Continue from yesterday"
-Agent: "I don't have access to previous conversations"
+Agent: Suggests Vue (you use React)
 ```
 
-**Result:** Hours wasted re-explaining. Code breaks. Frustration builds.
+**Result:** Hours wasted. Code breaks. Frustration builds.
 
 ---
 
 ## 💡 The Solution
 
-**Guardian is a memory system for your AI agent.**
+**Guardian creates a project snapshot that any AI agent can understand.**
 
 ```
-It does NOT force rules.
-It does NOT impose structure.
-It does NOT require configuration.
-
-It DISCOVERS your project automatically.
-It REMEMBERS everything for the agent.
-It PROTECTS your code from agent mistakes.
+✅ Discovers your tech stack automatically
+✅ Maps all files and their functions
+✅ Tracks connections between services
+✅ Remembers locked decisions
+✅ Prevents duplicate files
 ```
 
 ---
 
-## 🧠 How It Works
+## 🚀 Installation
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│  1. DISCOVERY (Automatic)                               │
-│     Agent scans your project:                           │
-│     • Tech stack from package.json, requirements.txt    │
-│     • File structure from actual folders                │
-│     • Run commands from scripts                         │
-│     • Connections between frontend ↔ backend            │
-│                                                         │
-│  2. MEMORY (guardian.mdc)                               │
-│     Everything saved in one file:                       │
-│     • How to run the project                            │
-│     • What servers are running (ports)                  │
-│     • Where files should go                             │
-│     • What breaks easily                                │
-│                                                         │
-│  3. PROTECTION (Every Request)                          │
-│     Before ANY change, agent must:                      │
-│     • Read the memory file                              │
-│     • Classify the change type                          │
-│     • Show what it will/won't touch                     │
-│     • Wait for your "ok"                                │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+### Option 1: One Command
+```bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
 ```
 
----
+### Option 2: npx (after npm publish)
+```bash
+npx create-guardian
+```
 
-## 🚀 Quick Start
-
-### The Magic Way (30 seconds)
-
-Just tell your AI agent:
-
+### Option 3: Tell Your Agent
 ```
 Install Project Guardian from: github.com/Haithamhaj/project-guardian
 ```
 
-**That's it.** The agent:
-1. Reads `AGENT_INSTALL.md`
-2. Scans your project automatically
-3. Creates a memory file with everything it discovered
-4. Asks you to confirm
-
-**You answer 1-2 questions max.** Everything else is auto-detected.
-
 ---
 
-### Manual Installation
+## 📁 What It Creates
 
-```bash
-# 1. Clone
-git clone https://github.com/Haithamhaj/project-guardian.git
-
-# 2. Copy template to your project
-cp project-guardian/templates/guardian.mdc /your/project/
-
-# 3. Move to correct location based on your IDE:
-
-# Cursor:
-mkdir -p .cursor/rules && mv guardian.mdc .cursor/rules/
-
-# Windsurf:
-mkdir -p .windsurf/rules && mv guardian.mdc .windsurf/rules/guardian.md
-
-# VS Code + Copilot:
-mkdir -p .github && mv guardian.mdc .github/copilot-instructions.md
-
-# Claude Code:
-mv guardian.mdc CLAUDE.md
-```
-
----
-
-## 📁 What's Included
-
-```
-project-guardian/
-├── AGENT_INSTALL.md              # Smart installer for AI agents
-├── templates/
-│   ├── guardian.mdc              # Memory template
-│   └── developer-toolkit/        # Debug tools (React)
-│       ├── diagnostics.js
-│       ├── logger.js
-│       ├── networkMonitor.js
-│       └── ToolkitView.jsx
-├── examples/
-│   ├── hva-project-memory.mdc    # Real-world example (filled)
-│   └── react-fastapi.mdc         # React + FastAPI example
-└── docs/
-    └── customization.md
-```
-
----
-
-## 🔄 Change Management
-
-Guardian classifies every change before executing:
-
-| Type | What It Is | Agent Rules |
-|------|------------|-------------|
-| **PURE_UI_STYLE** | Colors, spacing, text | Touch CSS only. No new files. |
-| **UI_BEHAVIOUR_TWEAK** | Button logic, toasts | Edit existing files. No new routes. |
-| **NEW_FEATURE_FLOW** | New screens, features | Confirm design first. Update memory after. |
-
-### Example:
-
-```
-You: "Make the button bigger"
-
-Agent Response:
-┌────────────────────────────────────────────────┐
-│ You want to increase the button size.          │
-│                                                │
-│ Classification: PURE_UI_STYLE                  │
-│ Files to modify: src/components/Button.jsx     │
-│ Will NOT change: logic, hooks, other files     │
-│                                                │
-│ Can I proceed?                                 │
-└────────────────────────────────────────────────┘
-```
-
-**No more surprise refactors. No more broken code.**
-
----
-
-## 📊 What Guardian Tracks
+Guardian scans your project and creates a snapshot with:
 
 | Section | Purpose |
 |---------|---------|
-| **HOW TO RUN** | Exact commands to start the project |
-| **RUNNING NOW** | Which servers are active on which ports |
-| **TECH STACK** | Detected technologies (don't suggest alternatives) |
-| **FILE MAP** | Where every type of file should go |
-| **CONNECTIONS MAP** | How frontend ↔ backend ↔ database connect |
-| **CHANGE MANAGEMENT** | Rules for different types of changes |
-| **RECENT CHANGES** | What was modified and when |
-| **KNOWN ISSUES** | Current bugs to be aware of |
-| **THINGS THAT BREAK** | Critical files/configs to protect |
+| **IDENTITY** | Project name and purpose |
+| **TECH_STACK** | Technologies used (don't suggest alternatives) |
+| **DEPENDENCIES** | Package versions |
+| **ENV_VARS** | Required environment variables |
+| **FILES** | All files with their purposes and functions |
+| **CONNECTIONS** | How services talk to each other |
+| **RUN** | Exact commands to run the project |
+| **LOCKED** | Decisions that cannot change |
+| **DANGER** | Files that break easily |
 
 ---
 
-## 🤝 Works With
+## 🤖 How The Agent Uses It
 
-| IDE/Tool | Config Location |
-|----------|-----------------|
+Before ANY action, the agent:
+
+1. ✅ Reads the Guardian snapshot
+2. ✅ Checks if similar file exists
+3. ✅ Respects locked decisions
+4. ✅ Warns about danger zones
+5. ✅ Updates snapshot after changes
+
+---
+
+## 📂 File Locations
+
+| IDE | Location |
+|-----|----------|
 | Cursor | `.cursor/rules/guardian.mdc` |
 | Windsurf | `.windsurf/rules/guardian.md` |
 | VS Code + Copilot | `.github/copilot-instructions.md` |
 | Claude Code | `CLAUDE.md` |
-| Aider | `CONVENTIONS.md` |
 
 ---
 
-## 📈 Results
+## 🔄 Updating
 
-| Before Guardian | After Guardian |
-|-----------------|----------------|
-| Re-explain context every session | Explain once, remembered forever |
-| Agent suggests wrong tech | Agent knows your stack |
-| Surprise file creation | Agent asks before creating |
-| Servers on wrong ports | Ports tracked and checked |
-| "It's fixed!" (it's not) | Agent verifies before claiming done |
-| 12 hours debugging agent mistakes | Minutes to implement features |
+Re-scan your project anytime:
+```bash
+python src/guardian_scanner.py .
+```
 
----
-
-## 🗺️ Roadmap
-
-- [x] Memory system (guardian.mdc)
-- [x] Auto-discovery installation
-- [x] Change Management classification
-- [x] Developer Toolkit (diagnostics)
-- [ ] Web configurator (guardian.dev)
-- [ ] CLI tool (`npx create-guardian`)
-- [ ] VS Code extension
-- [ ] Multi-project support
-- [ ] Team sync features
+Or tell your agent:
+```
+Update Guardian snapshot
+```
 
 ---
 
-## 🤝 Contributing
+<a name="arabic"></a>
+# 🇸🇦 التوثيق العربي
 
-PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+## 😤 المشكلة
+
+عندما تعمل مع وكلاء الذكاء الاصطناعي (Cursor, Windsurf, Copilot...)، هذا يحدث باستمرار:
+
+```
+أنت: "غيّر لون الزر"
+الوكيل: ينشئ 3 ملفات جديدة ويعيد هيكلة كل شيء
+
+أنت: "أصلح مشكلة تسجيل الدخول"
+الوكيل: يستخدم port 3000 (مشروعك يستخدم 8765)
+
+أنت: "أضف رسالة toast"
+الوكيل: يقترح Vue (أنت تستخدم React)
+```
+
+**النتيجة:** ساعات ضائعة. الكود يتكسر. الإحباط يتراكم.
 
 ---
 
-## 📄 License
+## 💡 الحل
 
-MIT - Use it, modify it, ship it.
+**Guardian ينشئ صورة كاملة للمشروع يفهمها أي وكيل ذكاء اصطناعي.**
+
+```
+✅ يكتشف التقنيات المستخدمة تلقائياً
+✅ يرسم خريطة لكل الملفات ووظائفها
+✅ يتتبع الاتصالات بين الخدمات
+✅ يتذكر القرارات المُقفلة
+✅ يمنع تكرار الملفات
+```
+
+---
+
+## 🚀 التثبيت
+
+### الخيار 1: أمر واحد
+```bash
+curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/install.sh | bash
+```
+
+### الخيار 2: npx (بعد النشر على npm)
+```bash
+npx create-guardian
+```
+
+### الخيار 3: قل للوكيل
+```
+Install Project Guardian from: github.com/Haithamhaj/project-guardian
+```
+
+---
+
+## 📁 ماذا يُنشئ؟
+
+Guardian يفحص مشروعك ويُنشئ snapshot يحتوي على:
+
+| القسم | الغرض |
+|-------|-------|
+| **IDENTITY** | اسم المشروع والغرض منه |
+| **TECH_STACK** | التقنيات المستخدمة (لا تقترح بدائل) |
+| **DEPENDENCIES** | إصدارات الحزم |
+| **ENV_VARS** | متغيرات البيئة المطلوبة |
+| **FILES** | كل الملفات مع أغراضها ودوالها |
+| **CONNECTIONS** | كيف تتواصل الخدمات مع بعضها |
+| **RUN** | أوامر تشغيل المشروع بالضبط |
+| **LOCKED** | قرارات لا يمكن تغييرها |
+| **DANGER** | ملفات تتكسر بسهولة |
+
+---
+
+## 🤖 كيف يستخدمه الوكيل؟
+
+قبل أي عمل، الوكيل:
+
+1. ✅ يقرأ Guardian snapshot
+2. ✅ يتحقق إذا كان ملف مشابه موجود
+3. ✅ يحترم القرارات المُقفلة
+4. ✅ يحذر من المناطق الخطرة
+5. ✅ يُحدّث الـ snapshot بعد التغييرات
+
+---
+
+## 📂 مواقع الملفات
+
+| IDE | المكان |
+|-----|--------|
+| Cursor | `.cursor/rules/guardian.mdc` |
+| Windsurf | `.windsurf/rules/guardian.md` |
+| VS Code + Copilot | `.github/copilot-instructions.md` |
+| Claude Code | `CLAUDE.md` |
+
+---
+
+## 🔄 التحديث
+
+أعد فحص مشروعك في أي وقت:
+```bash
+python src/guardian_scanner.py .
+```
+
+أو أخبر الوكيل:
+```
+حدّث Guardian snapshot
+```
 
 ---
 
 <div align="center">
 
+## 🤝 Contributing | المساهمة
+
+PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## 📄 License | الرخصة
+
+MIT - Use it, modify it, ship it.
+
+---
+
 **🛡️ Project Guardian**
 
 *Discover. Remember. Protect.*
 
-[⭐ Star this repo](../../) · [🐛 Report Bug](../../issues) · [💡 Request Feature](../../issues)
+*اكتشف. تذكّر. احمِ.*
 
 ---
 
 **A Product by [Imperfect Success](https://imperfectsuccess.com)**
-
-*No Medals. Just Real Progress.*
 
 </div>

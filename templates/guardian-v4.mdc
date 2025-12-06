@@ -1,0 +1,176 @@
+---
+description: 🛡️ PROJECT SNAPSHOT - Read before ANY action
+globs: **/*
+alwaysApply: true
+---
+
+# 🧠 PROJECT SNAPSHOT
+> ⚠️ READ THIS BEFORE ANY CODE CHANGE
+> Auto-synced: {{TIMESTAMP}}
+
+---
+
+## IDENTITY
+```yaml
+name: {{PROJECT_NAME}}
+purpose: {{ONE_LINE_PURPOSE}}
+status: {{development|staging|production}}
+```
+
+---
+
+## TECH_STACK
+> ❌ DO NOT SUGGEST ALTERNATIVES
+```yaml
+frontend: {{FRAMEWORK}}
+backend: {{FRAMEWORK}}
+database: {{DATABASE}}
+styling: {{CSS_METHOD}}
+# Add more as needed
+```
+
+---
+
+## DEPENDENCIES
+```yaml
+frontend:
+  {{package}}: {{version}}
+  {{package}}: {{version}}
+backend:
+  {{package}}: {{version}}
+  {{package}}: {{version}}
+```
+
+---
+
+## ENV_VARS
+```yaml
+required:
+  - {{VAR_NAME}}: {{description}}
+  - {{VAR_NAME}}: {{description}}
+optional:
+  - {{VAR_NAME}}: {{description}}
+```
+
+---
+
+## FILES
+> 📂 CHECK HERE BEFORE CREATING ANY FILE
+> Format: `path: purpose | main_functions`
+
+### Frontend
+```
+src/components/{{Component}}.jsx: {{purpose}} | {{func1}}, {{func2}}
+src/hooks/{{useHook}}.js: {{purpose}} | {{func1}}, {{func2}}
+src/pages/{{Page}}.jsx: {{purpose}} | -
+src/lib/{{util}}.js: {{purpose}} | {{func1}}, {{func2}}
+```
+
+### Backend
+```
+api/main.py: server-entry | app, {{handlers}}
+api/routes/{{route}}.py: {{purpose}} | {{endpoints}}
+api/services/{{service}}.py: {{purpose}} | {{functions}}
+api/models/{{model}}.py: {{purpose}} | {{classes}}
+```
+
+### Config
+```
+package.json: npm config
+{{config_file}}: {{purpose}}
+```
+
+---
+
+## CONNECTIONS
+```yaml
+frontend:
+  port: {{PORT}}
+  connects_to: [backend]
+backend:
+  port: {{PORT}}  # ⚠️ DO NOT CHANGE
+  connects_to: [database, {{external_apis}}]
+websocket:
+  path: {{/ws}}
+  used_by: [{{files}}]
+database:
+  type: {{SQLite|PostgreSQL|etc}}
+  path: {{path_if_local}}
+```
+
+---
+
+## RUN
+> ⚡ USE EXACTLY THESE COMMANDS
+```bash
+# Development
+frontend: {{command}}
+backend: {{command}}
+
+# Test
+test_frontend: {{command}}
+test_backend: {{command}}
+test_e2e: {{command}}
+```
+
+---
+
+## LOCKED
+> 🔒 CANNOT CHANGE WITHOUT USER APPROVAL
+```yaml
+- {{decision}}: {{value}} # locked: {{date}} | {{reason}}
+- {{decision}}: {{value}} # locked: PERMANENT
+```
+
+---
+
+## DANGER
+> ⚠️ THESE FILES BREAK EASILY
+```yaml
+- path: {{file}}, reason: {{why_dangerous}}
+- path: {{file}}, reason: {{why_dangerous}}
+```
+
+---
+
+## ISSUES
+> 🐛 CURRENT KNOWN ISSUES
+```yaml
+1. {{description}} | {{related_file}}
+2. {{description}} | {{related_file}}
+```
+
+---
+
+## CHANGES
+> 📝 RECENT CHANGES (Last 10)
+```yaml
+- {{YYYY-MM-DD}}: {{description}} | {{files}}
+- {{YYYY-MM-DD}}: {{description}} | {{files}}
+```
+
+---
+
+## AGENT_RULES
+> 🤖 YOU MUST FOLLOW THESE
+
+### Before ANY Action:
+1. ✅ Read this snapshot
+2. ✅ Check FILES - does similar exist?
+3. ✅ Check LOCKED - am I violating any?
+4. ✅ Check DANGER - is this risky?
+
+### Before Creating File:
+- CHECK: FILES section for same purpose
+- IF EXISTS: Ask "تعديل الموجود أم إنشاء جديد؟"
+- LOCATION: Follow existing folder pattern
+
+### Before Modifying Code:
+- CHECK: CONNECTIONS - what depends on this?
+- CHECK: DANGER - is this file risky?
+- WARN: If touching danger zone
+
+### After ANY Change:
+- UPDATE: FILES if new file created
+- UPDATE: CHANGES section
+- UPDATE: ISSUES if bug fixed

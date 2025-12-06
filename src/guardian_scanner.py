@@ -1,0 +1,509 @@
+#!/usr/bin/env python3
+"""
+Guardian Auto-Scanner
+Scans a project and generates a guardian.mdc snapshot automatically.
+"""
+
+import os
+import json
+import re
+import ast
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
+
+
+class GuardianScanner:
+    """Scans a project and generates a Guardian snapshot."""
+    
+    # Folders to skip
+    SKIP_DIRS = {
+        'node_modules', '__pycache__', '.git', '.venv', 'venv',
+        'dist', 'build', '.next', '.cache', 'coverage', '.pytest_cache'
+    }
+    
+    # File extensions to analyze
+    CODE_EXTENSIONS = {
+        '.py', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'
+    }
+    
+    def __init__(self, project_path: str):
+        self.project_path = Path(project_path).resolve()
+        self.project_name = self.project_path.name
+        self.snapshot = {
+            'identity': {},
+            'tech_stack': {},
+            'dependencies': {'frontend': {}, 'backend': {}},
+            'env_vars': {'required': [], 'optional': []},
+            'files': {},
+            'connections': {},
+            'run': {},
+            'locked': [],
+            'danger': [],
+            'issues': [],
+            'changes': []
+        }
+    
+    def scan(self) -> dict:
+        """Run full project scan."""
+        print(f"🔍 Scanning: {self.project_path}")
+        
+        self._detect_identity()
+        self._detect_tech_stack()
+        self._detect_dependencies()
+        self._detect_env_vars()
+        self._scan_files()
+        self._detect_connections()
+        self._detect_run_commands()
+        
+        return self.snapshot
+    
+    def _detect_identity(self):
+        """Detect project name and purpose."""
+        self.snapshot['identity'] = {
+            'name': self.project_name,
+            'purpose': self._guess_purpose(),
+            'status': 'development'
+        }
+    
+    def _guess_purpose(self) -> str:
+        """Try to guess project purpose from README or package.json."""
+        readme_path = self.project_path / 'README.md'
+        if readme_path.exists():
+            content = readme_path.read_text()[:500]
+            # Extract first paragraph after title
+            lines = content.split('\n')
+            for line in lines[1:]:
+                if line.strip() and not line.startswith('#'):
+                    return line.strip()[:100]
+        return "{{ONE_LINE_PURPOSE}}"
+    
+    def _detect_tech_stack(self):
+        """Detect technologies used."""
+        stack = {}
+        
+        # Check package.json for frontend
+        pkg_path = self.project_path / 'package.json'
+        if pkg_path.exists():
+            pkg = json.loads(pkg_path.read_text())
+            deps = {**pkg.get('dependencies', {}), **pkg.get('devDependencies', {})}
+            
+            # Frontend framework
+            if 'react' in deps:
+                stack['frontend'] = 'React ' + deps.get('react', '').lstrip('^~')
+            elif 'vue' in deps:
+                stack['frontend'] = 'Vue ' + deps.get('vue', '').lstrip('^~')
+            elif 'svelte' in deps:
+                stack['frontend'] = 'Svelte'
+            elif 'next' in deps:
+                stack['frontend'] = 'Next.js'
+            
+            # Styling
+            if 'tailwindcss' in deps:
+                stack['styling'] = 'Tailwind CSS'
+            elif 'styled-components' in deps:
+                stack['styling'] = 'Styled Components'
+            
+            # Electron
+            if 'electron' in deps:
+                stack['frontend'] = stack.get('frontend', '') + ' + Electron'
+        
+        # Check requirements.txt for backend
+        req_path = self.project_path / 'requirements.txt'
+        if req_path.exists():
+            content = req_path.read_text().lower()
+            if 'fastapi' in content:
+                stack['backend'] = 'FastAPI'
+            elif 'django' in content:
+                stack['backend'] = 'Django'
+            elif 'flask' in content:
+                stack['backend'] = 'Flask'
+        
+        # Check for database
+        if list(self.project_path.rglob('*.db')):
+            stack['database'] = 'SQLite'
+        
+        self.snapshot['tech_stack'] = stack
+    
+    def _detect_dependencies(self):
+        """Extract dependency versions."""
+        # Frontend deps
+        pkg_path = self.project_path / 'package.json'
+        if pkg_path.exists():
+            pkg = json.loads(pkg_path.read_text())
+            deps = pkg.get('dependencies', {})
+            # Get top 10 most important
+            important = ['react', 'vue', 'next', 'electron', 'tailwindcss', 
+                        'typescript', 'vite', 'webpack', 'express']
+            for dep in important:
+                if dep in deps:
+                    self.snapshot['dependencies']['frontend'][dep] = deps[dep].lstrip('^~')
+        
+        # Backend deps
+        req_path = self.project_path / 'requirements.txt'
+        if req_path.exists():
+            for line in req_path.read_text().split('\n'):
+                if '==' in line:
+                    name, version = line.split('==')[:2]
+                    self.snapshot['dependencies']['backend'][name.strip()] = version.strip()
+                elif line.strip() and not line.startswith('#'):
+                    self.snapshot['dependencies']['backend'][line.strip()] = 'latest'
+    
+    def _detect_env_vars(self):
+        """Detect environment variables from .env.example or code."""
+        env_example = self.project_path / '.env.example'
+        if env_example.exists():
+            for line in env_example.read_text().split('\n'):
+                if '=' in line and not line.startswith('#'):
+                    var = line.split('=')[0].strip()
+                    self.snapshot['env_vars']['required'].append({
+                        'name': var,
+                        'description': 'TODO: add description'
+                    })
+        
+        # Also check .env.sample
+        env_sample = self.project_path / '.env.sample'
+        if env_sample.exists() and not env_example.exists():
+            for line in env_sample.read_text().split('\n'):
+                if '=' in line and not line.startswith('#'):
+                    var = line.split('=')[0].strip()
+                    self.snapshot['env_vars']['required'].append({
+                        'name': var,
+                        'description': 'TODO: add description'
+                    })
+    
+    def _scan_files(self):
+        """Scan all code files and extract functions."""
+        for ext in self.CODE_EXTENSIONS:
+            for file_path in self.project_path.rglob(f'*{ext}'):
+                # Skip excluded directories
+                if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                    continue
+                
+                rel_path = file_path.relative_to(self.project_path)
+                purpose = self._infer_purpose(file_path)
+                functions = self._extract_functions(file_path)
+                
+                self.snapshot['files'][str(rel_path)] = {
+                    'purpose': purpose,
+                    'functions': functions
+                }
+    
+    def _infer_purpose(self, file_path: Path) -> str:
+        """Infer file purpose from name and location."""
+        name = file_path.stem.lower()
+        parent = file_path.parent.name.lower()
+        
+        # Component patterns
+        if parent in ['components', 'component']:
+            return f"{name}-ui"
+        if parent in ['hooks', 'hook']:
+            return f"{name}-logic"
+        if parent in ['pages', 'views']:
+            return f"{name}-page"
+        if parent in ['routes', 'api']:
+            return f"{name}-endpoints"
+        if parent in ['services', 'service']:
+            return f"{name}-service"
+        if parent in ['utils', 'helpers', 'lib']:
+            return f"{name}-utils"
+        if parent in ['models', 'model']:
+            return f"{name}-model"
+        
+        # Entry points
+        if name in ['main', 'app', 'index', 'server']:
+            return 'entry-point'
+        
+        return f"{name}"
+    
+    def _extract_functions(self, file_path: Path) -> List[str]:
+        """Extract function/method names from a file."""
+        functions = []
+        ext = file_path.suffix
+        
+        try:
+            content = file_path.read_text()
+            
+            if ext == '.py':
+                # Python: use AST
+                try:
+                    tree = ast.parse(content)
+                    for node in ast.walk(tree):
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            if not node.name.startswith('_'):
+                                functions.append(node.name)
+                except SyntaxError:
+                    pass
+            
+            elif ext in ['.js', '.jsx', '.ts', '.tsx']:
+                # JavaScript/TypeScript: regex patterns
+                patterns = [
+                    r'(?:function|const|let|var)\s+(\w+)\s*(?:=\s*(?:async\s*)?\(|=\s*(?:async\s*)?function|\()',
+                    r'(?:async\s+)?(\w+)\s*\([^)]*\)\s*{',
+                    r'export\s+(?:default\s+)?(?:async\s+)?function\s+(\w+)',
+                ]
+                for pattern in patterns:
+                    matches = re.findall(pattern, content)
+                    functions.extend(matches)
+                
+                # Remove duplicates and filter
+                functions = list(set(f for f in functions 
+                                    if f and not f.startswith('_') 
+                                    and f not in ['if', 'for', 'while', 'switch']))
+        
+        except Exception:
+            pass
+        
+        return functions[:10]  # Limit to top 10
+    
+    def _detect_connections(self):
+        """Detect ports and connections between services."""
+        connections = {}
+        
+        # Search for port definitions
+        port_patterns = [
+            r'port["\']?\s*[=:]\s*(\d{4,5})',
+            r'localhost:(\d{4,5})',
+            r'127\.0\.0\.1:(\d{4,5})',
+            r'PORT\s*=\s*(\d{4,5})',
+        ]
+        
+        for file_path in self.project_path.rglob('*'):
+            if file_path.is_file() and file_path.suffix in ['.py', '.js', '.ts', '.env', '.json']:
+                if any(skip in file_path.parts for skip in self.SKIP_DIRS):
+                    continue
+                try:
+                    content = file_path.read_text()
+                    for pattern in port_patterns:
+                        matches = re.findall(pattern, content, re.IGNORECASE)
+                        for port in matches:
+                            if 1000 <= int(port) <= 65535:
+                                connections[port] = str(file_path.relative_to(self.project_path))
+                except Exception:
+                    pass
+        
+        self.snapshot['connections'] = connections
+    
+    def _detect_run_commands(self):
+        """Detect run commands from package.json or common patterns."""
+        run = {}
+        
+        # Check package.json scripts
+        pkg_path = self.project_path / 'package.json'
+        if pkg_path.exists():
+            pkg = json.loads(pkg_path.read_text())
+            scripts = pkg.get('scripts', {})
+            
+            if 'dev' in scripts:
+                run['frontend'] = f"npm run dev"
+            elif 'start' in scripts:
+                run['frontend'] = f"npm start"
+            
+            if 'test' in scripts:
+                run['test_frontend'] = "npm test"
+        
+        # Check for Python backend
+        if (self.project_path / 'requirements.txt').exists():
+            main_py = self.project_path / 'main.py'
+            api_main = self.project_path / 'api' / 'main.py'
+            
+            if api_main.exists():
+                run['backend'] = "cd api && uvicorn main:app --reload"
+            elif main_py.exists():
+                run['backend'] = "uvicorn main:app --reload"
+        
+        self.snapshot['run'] = run
+    
+    def generate_mdc(self) -> str:
+        """Generate the MDC file content."""
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+        
+        # Build files section
+        files_str = ""
+        for path, info in sorted(self.snapshot['files'].items()):
+            funcs = ', '.join(info['functions'][:5]) if info['functions'] else '-'
+            files_str += f"{path}: {info['purpose']} | {funcs}\n"
+        
+        # Build dependencies section
+        deps_frontend = '\n  '.join(f"{k}: {v}" for k, v in self.snapshot['dependencies']['frontend'].items())
+        deps_backend = '\n  '.join(f"{k}: {v}" for k, v in self.snapshot['dependencies']['backend'].items())
+        
+        # Build env vars section
+        env_required = '\n  '.join(f"- {v['name']}: {v['description']}" 
+                                   for v in self.snapshot['env_vars']['required'])
+        
+        # Build connections section
+        connections_str = '\n'.join(f"  port_{port}: {file}" 
+                                    for port, file in self.snapshot['connections'].items())
+        
+        # Build run section
+        run_str = '\n'.join(f"{k}: {v}" for k, v in self.snapshot['run'].items())
+        
+        mdc = f"""---
+description: 🛡️ PROJECT SNAPSHOT - Read before ANY action
+globs: **/*
+alwaysApply: true
+---
+
+# 🧠 {self.snapshot['identity']['name']} SNAPSHOT
+> ⚠️ READ THIS BEFORE ANY CODE CHANGE
+> Auto-synced: {timestamp}
+
+---
+
+## IDENTITY
+```yaml
+name: {self.snapshot['identity']['name']}
+purpose: {self.snapshot['identity']['purpose']}
+status: {self.snapshot['identity']['status']}
+```
+
+---
+
+## TECH_STACK
+> ❌ DO NOT SUGGEST ALTERNATIVES
+```yaml
+{chr(10).join(f"{k}: {v}" for k, v in self.snapshot['tech_stack'].items())}
+```
+
+---
+
+## DEPENDENCIES
+```yaml
+frontend:
+  {deps_frontend if deps_frontend else '# No frontend dependencies detected'}
+backend:
+  {deps_backend if deps_backend else '# No backend dependencies detected'}
+```
+
+---
+
+## ENV_VARS
+```yaml
+required:
+  {env_required if env_required else '# No env vars detected - check .env.example'}
+optional:
+  # Add optional vars here
+```
+
+---
+
+## FILES
+> 📂 CHECK HERE BEFORE CREATING ANY FILE
+```
+{files_str if files_str else '# No code files detected'}
+```
+
+---
+
+## CONNECTIONS
+```yaml
+{connections_str if connections_str else '# No connections detected'}
+```
+
+---
+
+## RUN
+> ⚡ USE EXACTLY THESE COMMANDS
+```bash
+{run_str if run_str else '# Add run commands here'}
+```
+
+---
+
+## LOCKED
+> 🔒 CANNOT CHANGE WITHOUT USER APPROVAL
+```yaml
+# Add locked decisions here
+# Example: - React: framework # locked: PERMANENT
+```
+
+---
+
+## DANGER
+> ⚠️ THESE FILES BREAK EASILY
+```yaml
+# Add dangerous files here
+# Example: - path: main.py, reason: port hardcoded
+```
+
+---
+
+## ISSUES
+> 🐛 CURRENT KNOWN ISSUES
+```yaml
+# Add known issues here
+```
+
+---
+
+## CHANGES
+> 📝 RECENT CHANGES (Last 10)
+```yaml
+- {timestamp}: Initial Guardian scan | auto-generated
+```
+
+---
+
+## AGENT_RULES
+> 🤖 YOU MUST FOLLOW THESE
+
+### Before ANY Action:
+1. ✅ Read this snapshot
+2. ✅ Check FILES - does similar exist?
+3. ✅ Check LOCKED - am I violating any?
+4. ✅ Check DANGER - is this risky?
+
+### Before Creating File:
+- CHECK: FILES section for same purpose
+- IF EXISTS: Ask "تعديل الموجود أم إنشاء جديد؟"
+- LOCATION: Follow existing folder pattern
+
+### After ANY Change:
+- UPDATE: FILES if new file created
+- UPDATE: CHANGES section
+"""
+        return mdc
+    
+    def save(self, output_path: Optional[str] = None) -> str:
+        """Save the generated MDC file."""
+        if output_path is None:
+            output_path = self.project_path / 'guardian.mdc'
+        else:
+            output_path = Path(output_path)
+        
+        content = self.generate_mdc()
+        output_path.write_text(content)
+        print(f"✅ Saved: {output_path}")
+        return str(output_path)
+
+
+def scan_project(project_path: str, output_path: Optional[str] = None) -> str:
+    """
+    Scan a project and generate a Guardian snapshot.
+    
+    Args:
+        project_path: Path to the project root
+        output_path: Optional custom output path for the MDC file
+    
+    Returns:
+        Path to the generated guardian.mdc file
+    """
+    scanner = GuardianScanner(project_path)
+    scanner.scan()
+    return scanner.save(output_path)
+
+
+if __name__ == '__main__':
+    import sys
+    
+    if len(sys.argv) < 2:
+        print("Usage: python guardian_scanner.py <project_path> [output_path]")
+        print("Example: python guardian_scanner.py /path/to/myproject")
+        sys.exit(1)
+    
+    project_path = sys.argv[1]
+    output_path = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    result = scan_project(project_path, output_path)
+    print(f"\n🛡️ Guardian snapshot generated: {result}")

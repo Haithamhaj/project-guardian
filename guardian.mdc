@@ -1,0 +1,129 @@
+---
+description: 🛡️ PROJECT SNAPSHOT - Read before ANY action
+globs: **/*
+alwaysApply: true
+---
+
+# 🧠 project-guardian SNAPSHOT
+> ⚠️ READ THIS BEFORE ANY CODE CHANGE
+> Auto-synced: 2025-12-06 12:05
+
+---
+
+## IDENTITY
+```yaml
+name: project-guardian
+purpose: **It discovers your project. It remembers everything. You never repeat yourself.**
+status: development
+```
+
+---
+
+## TECH_STACK
+> ❌ DO NOT SUGGEST ALTERNATIVES
+```yaml
+
+```
+
+---
+
+## DEPENDENCIES
+```yaml
+frontend:
+  # No frontend dependencies detected
+backend:
+  # No backend dependencies detected
+```
+
+---
+
+## ENV_VARS
+```yaml
+required:
+  # No env vars detected - check .env.example
+optional:
+  # Add optional vars here
+```
+
+---
+
+## FILES
+> 📂 CHECK HERE BEFORE CREATING ANY FILE
+```
+src/guardian_mcp.py: guardian_mcp | create_mcp_tools, classify_change, get_project_memory, exists, read
+src/guardian_scanner.py: guardian_scanner | scan_project, scan, generate_mdc, save
+templates/developer-toolkit/ToolkitView.jsx: toolkitview | renderDiagnostics, catch, ToolkitView, renderNetwork, renderLogs
+templates/developer-toolkit/diagnostics.js: diagnostics | saveReport, checkRequiredFiles, runFullDiagnostics, checkMemoryUsage, catch
+templates/developer-toolkit/logger.js: logger | success, debug, export, getLogs, getCallSource
+templates/developer-toolkit/networkMonitor.js: networkmonitor | start, getRequests, logNetworkError, generateAgentReport, getReportPath
+
+```
+
+---
+
+## CONNECTIONS
+```yaml
+  port_8000: templates/developer-toolkit/diagnostics.js
+```
+
+---
+
+## RUN
+> ⚡ USE EXACTLY THESE COMMANDS
+```bash
+# Add run commands here
+```
+
+---
+
+## LOCKED
+> 🔒 CANNOT CHANGE WITHOUT USER APPROVAL
+```yaml
+# Add locked decisions here
+# Example: - React: framework # locked: PERMANENT
+```
+
+---
+
+## DANGER
+> ⚠️ THESE FILES BREAK EASILY
+```yaml
+# Add dangerous files here
+# Example: - path: main.py, reason: port hardcoded
+```
+
+---
+
+## ISSUES
+> 🐛 CURRENT KNOWN ISSUES
+```yaml
+# Add known issues here
+```
+
+---
+
+## CHANGES
+> 📝 RECENT CHANGES (Last 10)
+```yaml
+- 2025-12-06 12:05: Initial Guardian scan | auto-generated
+```
+
+---
+
+## AGENT_RULES
+> 🤖 YOU MUST FOLLOW THESE
+
+### Before ANY Action:
+1. ✅ Read this snapshot
+2. ✅ Check FILES - does similar exist?
+3. ✅ Check LOCKED - am I violating any?
+4. ✅ Check DANGER - is this risky?
+
+### Before Creating File:
+- CHECK: FILES section for same purpose
+- IF EXISTS: Ask "تعديل الموجود أم إنشاء جديد؟"
+- LOCATION: Follow existing folder pattern
+
+### After ANY Change:
+- UPDATE: FILES if new file created
+- UPDATE: CHANGES section

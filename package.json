@@ -1,0 +1,26 @@
+{
+  "name": "create-guardian",
+  "version": "4.0.0",
+  "description": "🛡️ Guardian - Your AI Agent's Memory System",
+  "bin": {
+    "create-guardian": "./bin/create-guardian.js"
+  },
+  "scripts": {
+    "scan": "node bin/create-guardian.js"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "cursor",
+    "windsurf",
+    "copilot",
+    "memory",
+    "project-rules"
+  ],
+  "author": "Haitham",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Haithamhaj/project-guardian"
+  }
+}

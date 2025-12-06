@@ -1,290 +1,172 @@
-# 🛡️ Guardian Installation - Smart Discovery
+# 🛡️ Guardian Installation - For AI Agents
+# تثبيت Guardian - للوكلاء الذكيين
 
 > **Your job:** Discover the project, build its memory, stay out of the way.
-> **Not your job:** Force rules, impose structure, ask many questions.
+> 
+> **مهمتك:** اكتشف المشروع، ابنِ ذاكرته، ابتعد عن الطريق.
 
 ---
 
-## 🎯 PHILOSOPHY
+## 📋 INSTALLATION STEPS | خطوات التثبيت
 
-```
-Guardian is NOT a rulebook.
-Guardian IS a memory system.
-
-You don't tell the project what to be.
-You discover what it is and remember it.
-```
-
----
-
-## 📋 INSTALLATION STEPS
-
-### STEP 1: Discover IDE & Set Target File
+### STEP 1: Detect IDE | اكتشف الـ IDE
 
 ```bash
-# Check automatically, don't ask unless all fail:
-
-.cursor/         → Cursor       → TARGET: .cursor/rules/guardian.mdc
-.windsurf/       → Windsurf     → TARGET: .windsurf/rules/guardian.md  # Note: .md not .mdc
-.vscode/         → VS Code      → TARGET: .github/copilot-instructions.md
-none             → Claude/Other → TARGET: CLAUDE.md (root)
+# Check which exists:
+.cursor/         → TARGET: .cursor/rules/guardian.mdc
+.windsurf/       → TARGET: .windsurf/rules/guardian.md
+.vscode/         → TARGET: .github/copilot-instructions.md
+none             → TARGET: CLAUDE.md (root)
 ```
-
-> **Important:** Save the TARGET path - you'll use it in STEP 6.
-> Windsurf uses `.md` extension, others use `.mdc` or `.md` as shown.
 
 ---
 
-### STEP 2: Discover Tech Stack (Silent)
-
-> **Note:** Use these detection methods conceptually. If you can't run shell commands directly, replicate their behavior by reading the actual files.
+### STEP 2: Download Scanner | حمّل الماسح
 
 ```bash
-# Frontend - check package.json:
-"react" in dependencies      → React
-"vue" in dependencies        → Vue
-"angular" in dependencies    → Angular
-"next" in dependencies       → Next.js
-"svelte" in dependencies     → Svelte
-
-# Backend - check requirements.txt OR package.json:
-"fastapi" in requirements    → FastAPI
-"django" in requirements     → Django
-"flask" in requirements      → Flask
-"express" in dependencies    → Express
-
-# Database - check config files or imports:
-*.db files exist             → SQLite
-DATABASE_URL with postgres   → PostgreSQL
-DATABASE_URL with mysql      → MySQL
-"mongodb" in config          → MongoDB
-
-# Styling - check config files:
-tailwind.config exists       → Tailwind
-"styled-components" in pkg   → Styled Components
-*.scss files exist           → SASS
+curl -sL https://raw.githubusercontent.com/Haithamhaj/project-guardian/main/src/guardian_scanner.py -o /tmp/guardian_scanner.py
 ```
+
+Or use the embedded scanner below.
+أو استخدم الماسح المضمّن أدناه.
 
 ---
 
-### STEP 3: Discover File Structure (Silent)
-
-> **Note:** If you can't run `find`, manually browse the project folders, skipping `node_modules`, `.git`, `venv`, `__pycache__`, `.next`, `dist`, `build`.
-
-**Identify these folders:**
-- Where are components?
-- Where are pages/views?
-- Where is the API/backend?
-- Where are utilities/helpers?
-- What are the entry points?
-
----
-
-### STEP 4: Discover Run Commands
-
-**Check these sources:**
-
-```
-package.json → "scripts" section:
-  - "dev", "start", "serve" = frontend
-  - "server", "api" = backend
-
-Python projects:
-  - uvicorn main:app / python main.py / flask run
-
-Docker:
-  - docker-compose.yml exists = docker-compose up
-
-Makefile:
-  - make run / make dev
-```
-
-**If not obvious, ask ONE question:**
-> "How do you run this project? (e.g., 'npm run dev' for frontend)"
-
----
-
-### STEP 5: Discover Connections
-
-**Find ports and connections:**
-
-```
-Check .env files for PORT variables
-Check config files for localhost:XXXX
-Check API client files for baseURL
-Check WebSocket connections
-```
-
----
-
-### STEP 6: Build the Memory File
-
-Fill the **TARGET file you identified in STEP 1** with discovered information.
-
-Use the template structure below. Make sure these **exact section names** exist:
-
-```markdown
-## ⚡ HOW TO RUN
-## ⚠️ RUNNING NOW
-## 🔧 TECH STACK (Detected)
-## 🗺️ FILE MAP
-## 🔗 CONNECTIONS MAP
-## 🔄 CHANGE MANAGEMENT
-## 📝 RECENT CHANGES
-## ⚠️ KNOWN ISSUES
-## 🚫 THINGS THAT BREAK EASILY
-```
-
-**Example filled content:**
-
-```markdown
-## ⚡ HOW TO RUN
-# Frontend:
-npm run dev  →  runs on localhost:5173
-
-# Backend:
-uvicorn main:app --reload  →  runs on localhost:8000
-
-## ⚠️ RUNNING NOW
-| Service | Port | Status |
-|---------|------|--------|
-| Frontend | 5173 | 🔴 Stopped |
-| Backend | 8000 | 🔴 Stopped |
-
-## 🔧 TECH STACK (Detected)
-Frontend: React 18       # from package.json
-Backend:  FastAPI        # from requirements.txt
-Database: SQLite         # from .db file found
-Styling:  Tailwind       # from tailwind.config.js
-
-## 🗺️ FILE MAP
-[Actual structure discovered]
-
-## 🔗 CONNECTIONS MAP
-Frontend (:5173) → Backend (:8000/api)
-```
-
----
-
-### STEP 7: Create Reports Directory
+### STEP 3: Run Scanner | شغّل الماسح
 
 ```bash
-mkdir -p ~/Desktop/guardian-reports
+python3 /tmp/guardian_scanner.py "$(pwd)"
 ```
 
-This folder will store debug reports from the Developer Toolkit.
+This creates `guardian.mdc` with:
+- Project identity | هوية المشروع
+- Tech stack | التقنيات
+- File registry | سجل الملفات
+- Connections | الاتصالات
+- Run commands | أوامر التشغيل
 
 ---
 
-### STEP 8: Confirm with User (Brief)
+### STEP 4: Move to Target | انقل للموقع
 
-> ✅ Guardian installed!
-> 
-> **Memory file:** [TARGET path from STEP 1]
-> 
-> I discovered:
-> - **Stack:** React + FastAPI + SQLite
-> - **Frontend:** `npm run dev` → localhost:5173
-> - **Backend:** `uvicorn main:app` → localhost:8000
-> - **Structure:** [X] components, [X] pages, [X] API routes
-> 
-> Does this look right? Anything to add?
+```bash
+# Based on IDE detected in Step 1:
+# Cursor:
+mkdir -p .cursor/rules && mv guardian.mdc .cursor/rules/
 
----
+# Windsurf:
+mkdir -p .windsurf/rules && mv guardian.mdc .windsurf/rules/guardian.md
 
-## 🔄 AFTER INSTALLATION
+# VS Code:
+mkdir -p .github && mv guardian.mdc .github/copilot-instructions.md
 
-### Your ongoing job:
-
-```
-BEFORE every response:
-1. Re-read relevant sections of the memory file
-2. Check RUNNING NOW - what servers are active?
-3. Check FILE MAP - where do things go?
-4. Check CONNECTIONS MAP - what depends on what?
-
-AFTER every change:
-1. Update RECENT CHANGES
-2. Update FILE MAP if structure changed
-3. Update RUNNING NOW if server started/stopped
-4. Update KNOWN ISSUES if bug found/fixed
-```
-
-### When user asks you to do something:
-
-```
-1. Read the memory file
-2. Understand current state
-3. Plan your action
-4. Verify it won't break connections
-5. Do the work
-6. Update the memory file
-7. Tell user what you did
+# Claude:
+mv guardian.mdc CLAUDE.md
 ```
 
 ---
 
-## 🔧 Optional: Developer Toolkit
+### STEP 5: Confirm | تأكيد
 
-If the project uses React, consider adding the debug toolkit:
-
-```
-1. Copy `templates/developer-toolkit/` into the frontend src folder
-2. Mount `ToolkitView` component on a route like `/dev-tools`
-3. Add a "Save for AI" button that exports debug reports
-4. Reports save to ~/Desktop/guardian-reports/
-```
-
-**This connects:**
-- `guardian.mdc` = Project memory (structure, decisions)
-- `Debug Report` = Runtime snapshot (errors, network, state)
-
-When debugging, tell the agent:
-> "Read ~/Desktop/guardian-reports/latest.json and fix what you find"
-
----
-
-## ❌ WHAT NOT TO DO
+Tell the user:
+أخبر المستخدم:
 
 ```
-❌ Don't ask many questions - discover silently
-❌ Don't impose structure - document what exists
-❌ Don't suggest tech changes - remember what's used
-❌ Don't start servers without checking RUNNING NOW
-❌ Don't create files without checking FILE MAP
-❌ Don't guess - ask when unsure
+✅ Guardian installed!
+✅ تم تثبيت Guardian!
+
+📍 Location: [TARGET path]
+📍 المكان: [مسار الملف]
+
+🔍 Discovered:
+   - Stack: [technologies]
+   - Files: [X] code files indexed
+   - Connections: [ports found]
+
+🔍 اُكتشف:
+   - التقنيات: [technologies]
+   - الملفات: [X] ملف مفهرس
+   - الاتصالات: [ports found]
 ```
 
 ---
 
-## 🧠 REMEMBER
+## 🤖 AGENT RULES | قواعد الوكيل
+
+### Before ANY Code Change | قبل أي تعديل:
 
 ```
-You have no memory between sessions.
-The memory file IS your memory.
+1. READ Guardian snapshot | اقرأ الـ snapshot
+2. CHECK FILES section - does similar exist? | هل يوجد ملف مشابه؟
+3. CHECK LOCKED - am I violating any? | هل أخالف قرار مُقفل؟
+4. CHECK DANGER - is this risky? | هل هذا خطر؟
+```
 
-The user is non-technical.
-They can't re-explain everything each time.
+### Before Creating File | قبل إنشاء ملف:
 
-Your job is to:
-- Remember for them
-- Prevent your own mistakes
-- Keep the project consistent
+```
+1. Search FILES section for same purpose
+   ابحث في قسم FILES عن نفس الغرض
+
+2. If found, ask: "تعديل الموجود أم إنشاء جديد؟"
+   "Modify existing or create new?"
+
+3. Use correct folder based on existing pattern
+   استخدم المجلد الصحيح
+```
+
+### After ANY Change | بعد أي تعديل:
+
+```
+1. UPDATE FILES if new file created | حدّث FILES
+2. UPDATE CHANGES section | حدّث CHANGES
+3. UPDATE ISSUES if bug fixed | حدّث ISSUES
 ```
 
 ---
 
-## 📁 File Naming Reference
+## ❌ WHAT NOT TO DO | ما لا يجب فعله
 
-| IDE | Target File |
-|-----|-------------|
-| Cursor | `.cursor/rules/guardian.mdc` |
-| Windsurf | `.windsurf/rules/guardian.md` |
-| VS Code + Copilot | `.github/copilot-instructions.md` |
-| Claude Code | `CLAUDE.md` |
-| Aider | `CONVENTIONS.md` |
-| Other | `PROJECT_MEMORY.md` |
+```
+❌ Don't suggest alternative technologies
+   لا تقترح تقنيات بديلة
+
+❌ Don't change locked decisions
+   لا تغير القرارات المُقفلة
+
+❌ Don't create duplicate files
+   لا تنشئ ملفات مكررة
+
+❌ Don't modify DANGER files without warning
+   لا تعدل ملفات DANGER بدون تحذير
+
+❌ Don't start servers on different ports
+   لا تشغّل سيرفرات على ports مختلفة
+```
 
 ---
 
-*🛡️ Guardian v3 - Discover, Remember, Protect*
+## 🔄 UPDATE SNAPSHOT | تحديث الـ Snapshot
+
+When asked to update Guardian:
+
+```bash
+python3 /tmp/guardian_scanner.py "$(pwd)"
+# Then move to correct location as in Step 4
+```
+
+---
+
+## 📁 EMBEDDED SCANNER | الماسح المضمّن
+
+If curl is not available, create this file:
+
+```python
+# Save as guardian_scanner.py and run with: python3 guardian_scanner.py .
+# [Scanner code available at: src/guardian_scanner.py]
+```
+
+---
+
+*🛡️ Guardian v4 - Discover. Remember. Protect.*
+*🛡️ Guardian v4 - اكتشف. تذكّر. احمِ.*
