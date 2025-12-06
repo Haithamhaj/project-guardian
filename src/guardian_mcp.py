@@ -366,6 +366,84 @@ def create_mcp_tools():
         
         return {'duplicate_found': False}
     
+    @server.tool()
+    async def guardian_auto_register_file(project_path: str, file_path: str, purpose: str = None) -> Dict:
+        """
+        🔄 AUTO-SYNC: Register a new file in the FILES section.
+        Call this AFTER creating any new file.
+        
+        This extracts functions automatically and updates the guardian snapshot.
+        """
+        memory = GuardianMemory(project_path)
+        if not memory.exists():
+            return {'error': 'No guardian file found'}
+        
+        # Import scanner to extract functions
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from guardian_scanner import GuardianScanner
+        
+        # Get file info
+        full_path = Path(project_path) / file_path
+        if not full_path.exists():
+            return {'error': f'File not found: {file_path}'}
+        
+        # Extract functions from file
+        scanner = GuardianScanner(project_path)
+        functions = scanner._extract_functions(str(full_path))
+        
+        # Auto-generate purpose if not provided
+        if not purpose:
+            purpose = full_path.stem.replace('_', ' ').replace('-', ' ')
+        
+        # Add to FILES section
+        success = memory.add_file(file_path, purpose, functions)
+        
+        # Log the change
+        memory.add_change(f"Added {file_path}", [file_path])
+        memory.update_timestamp()
+        
+        return {
+            'registered': success,
+            'file': file_path,
+            'purpose': purpose,
+            'functions': functions
+        }
+    
+    @server.tool()
+    async def guardian_rescan(project_path: str) -> Dict:
+        """
+        🔄 AUTO-SYNC: Re-scan the entire project and update guardian.mdc.
+        Call this when major changes have been made.
+        """
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from guardian_scanner import GuardianScanner
+        
+        try:
+            scanner = GuardianScanner(project_path)
+            result = scanner.scan()
+            
+            # Find existing guardian location
+            memory = GuardianMemory(project_path)
+            if memory.guardian_path:
+                output_path = str(memory.guardian_path)
+            else:
+                output_path = str(Path(project_path) / 'guardian.mdc')
+            
+            scanner.save(output_path)
+            
+            return {
+                'rescanned': True,
+                'output': output_path,
+                'files_count': len(result.get('files', {})),
+                'tech_stack': result.get('tech_stack', {})
+            }
+        except Exception as e:
+            return {'error': str(e)}
+    
     return server
 
 

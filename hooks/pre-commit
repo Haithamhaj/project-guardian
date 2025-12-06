@@ -1,0 +1,55 @@
+#!/bin/bash
+# 🛡️ Guardian Pre-Commit Hook
+# Automatically updates guardian.mdc before each commit
+#
+# Installation:
+#   cp hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+
+echo "🛡️ Guardian: Updating project snapshot..."
+
+# Find the guardian scanner
+GUARDIAN_SCANNER=""
+POSSIBLE_PATHS=(
+    "./node_modules/.bin/guardian-h"
+    "$(npm root -g)/guardian-h/bin/create-guardian.js"
+    "./src/guardian_scanner.py"
+    "../guardian-h/src/guardian_scanner.py"
+)
+
+for path in "${POSSIBLE_PATHS[@]}"; do
+    if [ -f "$path" ]; then
+        GUARDIAN_SCANNER="$path"
+        break
+    fi
+done
+
+# Try npx as fallback
+if [ -z "$GUARDIAN_SCANNER" ]; then
+    if command -v npx &> /dev/null; then
+        echo "📥 Running npx guardian-h..."
+        npx guardian-h --quiet 2>/dev/null
+        if [ $? -eq 0 ]; then
+            echo "✅ Guardian snapshot updated"
+            
+            # Stage the updated guardian file
+            git add -A guardian.mdc .cursor/rules/guardian.mdc .windsurf/rules/guardian.md .github/copilot-instructions.md CLAUDE.md 2>/dev/null
+            
+            exit 0
+        fi
+    fi
+fi
+
+# Use Python scanner
+if [ -f "./src/guardian_scanner.py" ]; then
+    python3 ./src/guardian_scanner.py . --quiet 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "✅ Guardian snapshot updated"
+        git add -A guardian.mdc .cursor/rules/guardian.mdc 2>/dev/null
+        exit 0
+    fi
+fi
+
+# If we get here, just continue without updating
+echo "⚠️  Guardian scanner not found, skipping snapshot update"
+exit 0
