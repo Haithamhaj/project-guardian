@@ -3,14 +3,16 @@
 /**
  * 🛡️ Guardian CLI
  * Creates a Guardian snapshot for your project
+ * ✅ Pure JavaScript - No Python required!
  * 
- * Usage: npx create-guardian
+ * Usage: npx guardian-h
  */
 
-const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
+
+// Import the JS scanner
+const { GuardianScanner } = require('../src/scanner.js');
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -18,135 +20,94 @@ const COLORS = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   red: '\x1b[31m',
+  cyan: '\x1b[36m',
 };
 
 function log(msg, color = 'reset') {
   console.log(`${COLORS[color]}${msg}${COLORS.reset}`);
 }
 
-function downloadFile(url, dest) {
-  return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(dest);
-    https.get(url, (response) => {
-      if (response.statusCode === 302 || response.statusCode === 301) {
-        // Follow redirect
-        https.get(response.headers.location, (res) => {
-          res.pipe(file);
-          file.on('finish', () => {
-            file.close();
-            resolve();
-          });
-        });
-      } else {
-        response.pipe(file);
-        file.on('finish', () => {
-          file.close();
-          resolve();
-        });
-      }
-    }).on('error', reject);
-  });
-}
-
 async function main() {
-  log('\n🛡️ Guardian - Project Memory System\n', 'blue');
-  
+  log('\n🛡️ Guardian-H - Project Memory System\n', 'cyan');
+  log('   ✅ Pure JavaScript - No Python required!\n', 'green');
+
   const projectPath = process.cwd();
-  const tempDir = path.join(projectPath, '.guardian-temp');
-  
+
   // Check if this looks like a project
   const hasPackageJson = fs.existsSync(path.join(projectPath, 'package.json'));
   const hasRequirements = fs.existsSync(path.join(projectPath, 'requirements.txt'));
   const hasGit = fs.existsSync(path.join(projectPath, '.git'));
-  
-  if (!hasPackageJson && !hasRequirements && !hasGit) {
+  const hasPyproject = fs.existsSync(path.join(projectPath, 'pyproject.toml'));
+
+  if (!hasPackageJson && !hasRequirements && !hasGit && !hasPyproject) {
     log('⚠️  Warning: This doesn\'t look like a project folder.', 'yellow');
     log('   Make sure you\'re in your project\'s root directory.\n', 'yellow');
   }
-  
-  // Create temp directory
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-  
-  log('📥 Downloading Guardian scanner...', 'blue');
-  
-  const scannerUrl = 'https://raw.githubusercontent.com/Haithamhaj/guardian-h/main/src/guardian_scanner.py';
-  const scannerPath = path.join(tempDir, 'scanner.py');
-  
-  try {
-    await downloadFile(scannerUrl, scannerPath);
-  } catch (err) {
-    log('❌ Failed to download scanner. Check your internet connection.', 'red');
-    process.exit(1);
-  }
-  
+
   log('🔍 Scanning your project...', 'blue');
-  
-  // Check for Python
-  let pythonCmd = 'python3';
-  try {
-    execSync('python3 --version', { stdio: 'ignore' });
-  } catch {
-    try {
-      execSync('python --version', { stdio: 'ignore' });
-      pythonCmd = 'python';
-    } catch {
-      log('❌ Python is not installed. Please install Python first.', 'red');
-      log('   Visit: https://www.python.org/downloads/', 'yellow');
-      process.exit(1);
-    }
-  }
-  
-  // Run scanner
-  try {
-    execSync(`${pythonCmd} "${scannerPath}" "${projectPath}"`, { 
-      stdio: 'inherit',
-      cwd: projectPath 
-    });
-  } catch (err) {
-    log('❌ Failed to scan project.', 'red');
-    process.exit(1);
-  }
-  
-  // Detect IDE and move file
+
+  // Run the scanner
+  const scanner = new GuardianScanner(projectPath);
+  const snapshot = scanner.scan();
+
+  // Generate and save the MDC file
+  const guardianContent = scanner.generateLiteMdc();
   const guardianFile = path.join(projectPath, 'guardian.mdc');
-  
-  if (fs.existsSync(guardianFile)) {
-    let destPath = guardianFile;
-    let destName = 'guardian.mdc';
-    
-    if (fs.existsSync(path.join(projectPath, '.cursor'))) {
-      const rulesDir = path.join(projectPath, '.cursor', 'rules');
-      if (!fs.existsSync(rulesDir)) fs.mkdirSync(rulesDir, { recursive: true });
-      destPath = path.join(rulesDir, 'guardian.mdc');
-      fs.renameSync(guardianFile, destPath);
-      destName = '.cursor/rules/guardian.mdc';
-    } else if (fs.existsSync(path.join(projectPath, '.windsurf'))) {
-      const rulesDir = path.join(projectPath, '.windsurf', 'rules');
-      if (!fs.existsSync(rulesDir)) fs.mkdirSync(rulesDir, { recursive: true });
-      destPath = path.join(rulesDir, 'guardian.md');
-      fs.renameSync(guardianFile, destPath);
-      destName = '.windsurf/rules/guardian.md';
-    } else if (fs.existsSync(path.join(projectPath, '.vscode'))) {
-      const githubDir = path.join(projectPath, '.github');
-      if (!fs.existsSync(githubDir)) fs.mkdirSync(githubDir, { recursive: true });
-      destPath = path.join(githubDir, 'copilot-instructions.md');
-      fs.renameSync(guardianFile, destPath);
-      destName = '.github/copilot-instructions.md';
-    }
-    
-    log(`\n✅ Guardian installed to: ${destName}`, 'green');
+
+  // Detect IDE and determine destination
+  let destPath = guardianFile;
+  let destName = 'guardian.mdc';
+
+  if (fs.existsSync(path.join(projectPath, '.cursor'))) {
+    const rulesDir = path.join(projectPath, '.cursor', 'rules');
+    if (!fs.existsSync(rulesDir)) fs.mkdirSync(rulesDir, { recursive: true });
+    destPath = path.join(rulesDir, 'guardian.mdc');
+    destName = '.cursor/rules/guardian.mdc';
+    log('📁 Detected: Cursor IDE', 'blue');
+  } else if (fs.existsSync(path.join(projectPath, '.windsurf'))) {
+    const rulesDir = path.join(projectPath, '.windsurf', 'rules');
+    if (!fs.existsSync(rulesDir)) fs.mkdirSync(rulesDir, { recursive: true });
+    destPath = path.join(rulesDir, 'guardian.md');
+    destName = '.windsurf/rules/guardian.md';
+    log('📁 Detected: Windsurf', 'blue');
+  } else if (fs.existsSync(path.join(projectPath, '.vscode'))) {
+    const githubDir = path.join(projectPath, '.github');
+    if (!fs.existsSync(githubDir)) fs.mkdirSync(githubDir, { recursive: true });
+    destPath = path.join(githubDir, 'copilot-instructions.md');
+    destName = '.github/copilot-instructions.md';
+    log('📁 Detected: VS Code / Copilot', 'blue');
+  } else if (fs.existsSync(path.join(projectPath, 'CLAUDE.md')) ||
+    fs.existsSync(path.join(projectPath, '.claude'))) {
+    destPath = path.join(projectPath, 'CLAUDE.md');
+    destName = 'CLAUDE.md';
+    log('📁 Detected: Claude Code', 'blue');
   }
-  
-  // Cleanup
-  fs.rmSync(tempDir, { recursive: true, force: true });
-  
+
+  // Write the file
+  fs.writeFileSync(destPath, guardianContent, 'utf8');
+
+  // Show summary
+  const fileCount = Object.keys(snapshot.files).length;
+  const techCount = Object.keys(snapshot.tech_stack).length;
+
+  log(`\n✅ Guardian installed to: ${destName}`, 'green');
+  log(`   📂 Files scanned: ${fileCount}`, 'reset');
+  log(`   🏗️  Tech detected: ${techCount > 0 ? Object.values(snapshot.tech_stack).join(', ') : 'None'}`, 'reset');
+
   log('\n🎉 Installation complete!\n', 'green');
-  log('Next steps:', 'blue');
+  log('Next steps:', 'cyan');
   log('  1. Open your project in your IDE');
   log('  2. Start a new chat with your AI agent');
   log('  3. The agent will automatically read Guardian\n');
+
+  log('📚 Documentation:', 'cyan');
+  log('   https://github.com/Haithamhaj/guardian-h\n');
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  log(`\n❌ Error: ${err.message}`, 'red');
+  log('\n💡 If this problem persists:', 'yellow');
+  log('   - Make sure you\'re in a project directory');
+  log('   - Check: https://github.com/Haithamhaj/guardian-h/issues\n');
+  process.exit(1);
+});
