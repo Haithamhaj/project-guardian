@@ -273,9 +273,11 @@ class DuplicateFinder:
             if content1 == content2:
                 return 1.0
             
-            # Calculate hash similarity
-            hash1 = hashlib.md5(content1.encode()).hexdigest()
-            hash2 = hashlib.md5(content2.encode()).hexdigest()
+            # Note: Using SHA-256 for content comparison (not for security)
+            # This is for detecting identical files efficiently
+            import hashlib
+            hash1 = hashlib.sha256(content1.encode()).hexdigest()
+            hash2 = hashlib.sha256(content2.encode()).hexdigest()
             
             if hash1 == hash2:
                 return 1.0

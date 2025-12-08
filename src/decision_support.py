@@ -540,6 +540,8 @@ class DecisionLock:
         status: str = "PERMANENT"
     ) -> Dict:
         """Request to lock a decision"""
+        from memory_enhanced import DecisionStatus
+        
         # Validate inputs
         if not decision or not reasoning:
             return {
@@ -558,8 +560,6 @@ class DecisionLock:
                 }
         
         # Lock the decision
-        from memory_enhanced import DecisionStatus
-        
         status_map = {
             'PERMANENT': DecisionStatus.PERMANENT,
             'CONDITIONAL': DecisionStatus.CONDITIONAL,

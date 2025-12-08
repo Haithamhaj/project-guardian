@@ -320,7 +320,7 @@ def test_quality_control():
         # Create test files
         os.makedirs(f"{tmpdir}/src")
         
-        # Python file with unused import
+        # Python file with unused imports (intentional for dead code detection test)
         with open(f"{tmpdir}/src/test.py", 'w') as f:
             f.write("""
 import os
