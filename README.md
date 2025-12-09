@@ -35,6 +35,18 @@
 | 🔒 **Decision Locking** | Prevent agents from changing locked technical choices |
 | 📝 **Change Verification** | Track and verify all changes made by agents |
 | 🗺️ **Project Snapshots** | Versioned snapshots for rollback support |
+| 🎯 **Mind-Q Adapter** | NEW! Specialized adapter for data pipeline projects |
+
+### 🆕 Mind-Q Guardian Adapter
+
+Specialized extension for **Mind-Q V4.1** logistics data pipelines:
+
+- **Pipeline Spine**: Auto-generates pipeline structure (21 phases, KPIs, flows)
+- **Phase Cards**: Compact markdown cards for each pipeline stage
+- **Context Optimization**: 94% reduction in context size for LLMs
+- **Smart Context**: Auto-detects relevant phases from user requests
+
+[📖 Mind-Q Guardian Guide](docs/MINDQ_GUARDIAN_GUIDE.md)
 
 [📖 Read the Complete v7.0 Guide](docs/ENHANCED_GUIDE.md) | [📖 اقرأ الدليل الكامل](docs/ENHANCED_GUIDE_AR.md)
 
