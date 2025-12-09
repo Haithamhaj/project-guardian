@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 🛡️ Guardian Enhanced Scanner
-Integrates memory management, decision support, and quality control
+Integrates memory management, decision support, quality control, and Mind-Q pipeline support
 """
 
 import os
@@ -17,6 +17,13 @@ from guardian_scanner import GuardianScanner
 from memory_enhanced import EnhancedMemoryManager, DecisionStatus, ChangeType
 from decision_support import TechnologyAdvisor, ConflictResolver, DecisionLock, TechCategory
 from quality_control import QualityController
+
+# Try to import Mind-Q adapter (optional)
+try:
+    from guardian_mindq import MindQGuardianAdapter
+    MINDQ_AVAILABLE = True
+except ImportError:
+    MINDQ_AVAILABLE = False
 
 
 class GuardianEnhanced:
@@ -35,8 +42,35 @@ class GuardianEnhanced:
         self.decision_lock = DecisionLock(self.memory)
         self.quality_controller = QualityController(str(self.project_path))
         
+        # Initialize Mind-Q adapter if this is a Mind-Q project
+        self.mindq_adapter = None
+        if MINDQ_AVAILABLE and self._is_mindq_project():
+            try:
+                self.mindq_adapter = MindQGuardianAdapter(str(self.project_path))
+                print("🔧 Mind-Q pipeline detected - enhanced context enabled")
+            except Exception as e:
+                print(f"⚠️  Mind-Q adapter initialization failed: {e}")
+        
         # Session tracking
         self.current_session = None
+    
+    def _is_mindq_project(self) -> bool:
+        """
+        Detect if this is a Mind-Q project.
+        
+        Returns:
+            True if Mind-Q project markers are found
+        """
+        # Check for Mind-Q specific markers
+        markers = [
+            self.project_path / "phases",
+            self.project_path / "docs" / "PHASES_DETAILED_GUIDE.md",
+            self.project_path / "contracts",
+        ]
+        
+        # If at least 2 markers exist, consider it Mind-Q
+        found_markers = sum(1 for marker in markers if marker.exists())
+        return found_markers >= 2
     
     def full_scan(self, run_quality_check: bool = True) -> Dict:
         """
@@ -167,6 +201,15 @@ structure_violations: {quality['structure']['violations_count']}
 ```
 """
         
+        # Add Mind-Q context if available
+        mindq_context = ""
+        if self.mindq_adapter:
+            try:
+                mindq_context = self.mindq_adapter.get_mindq_context_for_mdc()
+            except Exception as e:
+                print(f"⚠️  Failed to generate Mind-Q context: {e}")
+                mindq_context = ""
+        
         # Enhanced MDC with all sections
         enhanced_mdc = f"""{base_mdc}
 
@@ -200,6 +243,10 @@ structure_violations: {quality['structure']['violations_count']}
 {recommendations_str}
 ```
 {quality_str}
+
+---
+
+{mindq_context}
 
 ---
 

@@ -689,56 +689,69 @@ class MindQGuardianAdapter:
         """
         Generate optimized Guardian context based on user request.
         
+        Uses map_request_to_phases() as the single source of truth for
+        mapping requests to relevant phases, eliminating duplicated logic.
+        
         Args:
             user_request: User's request or query
             
         Returns:
             Tailored context string for the request
         """
-        # Detect which phases are mentioned
-        relevant_phases = []
-        request_lower = user_request.lower()
+        # Use unified phase mapping
+        target_phases = self.map_request_to_phases(user_request)
         
-        for phase_id in self.phase_sequence:
-            phase_name = self._phase_id_to_name(phase_id).lower()
-            if phase_id in request_lower or any(word in request_lower for word in phase_name.split()):
-                relevant_phases.append(phase_id)
+        # Build KPI context if KPIs mentioned
+        kpi_context = self._build_kpi_context_for_request(user_request.lower())
         
-        # Check for KPI mentions
-        kpi_context = self._detect_kpi_context(request_lower)
-        
-        # If no specific phases detected, provide spine overview
-        if not relevant_phases and not kpi_context:
+        # If no specific phases or KPIs detected, provide spine overview
+        if not target_phases and not kpi_context:
             return self.get_spine_context()
         
         # Build context
         context = ""
         
-        # If KPIs mentioned, show which phases affect them
+        # Add KPI block if relevant
         if kpi_context:
             context += kpi_context + "\n\n"
         
-        # If specific phases detected, provide detailed context
-        if relevant_phases:
-            context += self.get_phase_context(relevant_phases[:3])  # Limit to 3 phases
+        # Add phase details (limit to 3 phases for context size)
+        if target_phases:
+            context += self.get_phase_context(target_phases[:3])
         
         return context if context else self.get_spine_context()
     
-    def _detect_kpi_context(self, request_lower: str) -> str:
-        """Detect KPI mentions and return relevant phase context."""
+    def _build_kpi_context_for_request(self, request_lower: str) -> str:
+        """
+        Build KPI context for a request.
+        
+        Reuses the same KPI detection logic as map_request_to_phases()
+        for consistency.
+        
+        Args:
+            request_lower: Lowercased user request
+            
+        Returns:
+            Formatted KPI context string
+        """
         if self._spine_data is None:
             self.build_spine()
         
-        kpi_names = [kpi['name'].lower() for kpi in self._spine_data['kpis']]
-        mentioned_kpis = [kpi for kpi in self._spine_data['kpis'] 
-                         if kpi['name'].lower() in request_lower or 
-                         any(word in request_lower for word in kpi['description'].lower().split()[:3])]
+        # Find mentioned KPIs using same logic as map_request_to_phases
+        mentioned_kpis = []
+        for kpi in self._spine_data['kpis']:
+            kpi_name_lower = kpi['name'].lower()
+            kpi_desc_words = kpi['description'].lower().split()[:5]
+            
+            if kpi_name_lower in request_lower or any(word in request_lower for word in kpi_desc_words):
+                mentioned_kpis.append(kpi)
         
         if not mentioned_kpis:
             return ""
         
+        # Build context
         context = "# Relevant KPIs\n\n"
-        for kpi in mentioned_kpis[:3]:  # Limit to 3 KPIs
+        for kpi in mentioned_kpis[:3]:  # Limit to 3 KPIs for context size
             context += f"**{kpi['name']}** - {kpi['description']}\n"
             if 'impacted_by' in kpi and kpi['impacted_by']:
                 phases_str = ', '.join(kpi['impacted_by'][:4])
@@ -960,6 +973,139 @@ class MindQGuardianAdapter:
             json.dump(changes, f, indent=2, ensure_ascii=False)
         
         return str(change_log_path)
+    
+    def build_llm_change_context(self, user_request: str) -> str:
+        """
+        Build a compact, structured markdown context for an LLM agent
+        planning a change.
+        
+        This is the primary method for providing change guidance to AI agents.
+        Returns a focused, actionable context that includes:
+        - Target phases
+        - Files to edit
+        - KPIs that will be affected
+        - Potential risks
+        
+        Args:
+            user_request: User's change request description
+            
+        Returns:
+            Structured markdown context for the LLM agent
+        """
+        # Build change request and plan
+        change_req = self.build_change_request(user_request)
+        plan = self.plan_change(change_req)
+        
+        # Build compact context
+        context = f"""# Mind-Q Change Guidance
+
+## Request
+{user_request}
+
+## Target Phases
+"""
+        for phase_id in change_req['target_phases']:
+            phase_name = self._phase_id_to_name(phase_id)
+            context += f"- **{phase_id}**: {phase_name}\n"
+        
+        context += f"\n## Files to Edit\n"
+        for file_path in plan['files_to_edit'][:6]:  # Limit to 6 files
+            context += f"- `{file_path}`\n"
+        
+        if plan['affected_kpis']:
+            context += f"\n## Affected KPIs\n"
+            for kpi_name in plan['affected_kpis']:
+                context += f"- {kpi_name}\n"
+        
+        if plan['potential_risks']:
+            context += f"\n## ⚠️ Risks & Considerations\n"
+            for risk in plan['potential_risks']:
+                context += f"- {risk}\n"
+        
+        # Add phase details for first 2 target phases
+        if change_req['target_phases']:
+            context += f"\n## Phase Details\n\n"
+            context += self.get_phase_context(change_req['target_phases'][:2])
+        
+        # Add recommendation
+        context += f"""\n\n## 📋 Recommended Workflow
+
+1. **Review** the files listed above in target phases
+2. **Check** for dependencies between phases if multiple affected
+3. **Test** changes in each phase independently
+4. **Verify** that affected KPIs are tracked after changes
+5. **Record** the change using `record_change()` for audit trail
+"""
+        
+        return context
+    
+    def get_mindq_context_for_mdc(self) -> str:
+        """
+        Generate Mind-Q specific context for inclusion in Guardian MDC files.
+        
+        This method is called by GuardianEnhanced to add Mind-Q pipeline
+        context to IDE rule files (.cursor/rules, .windsurf/rules, etc.)
+        
+        Returns:
+            Formatted Mind-Q context section for MDC
+        """
+        if self._spine_data is None:
+            self.build_spine()
+        
+        # Build compact Mind-Q context
+        context = """
+## 🔧 MIND-Q PIPELINE CONTEXT
+
+> This is a Mind-Q V4.1 logistics data pipeline project.
+> The pipeline is organized into sequential phases for data processing.
+
+### Phase Structure
+"""
+        
+        # Add phases grouped by category
+        core_phases = [p for p in self.phase_sequence if p.split('_')[0] in ['01', '02', '03', '04', '05', '06', '07']]
+        advanced_phases = [p for p in self.phase_sequence if p.split('_')[0] in ['08', '09', '10', '11', '12']]
+        
+        context += "\n**Core Pipeline:**\n"
+        for phase_id in core_phases[:10]:  # Limit for context size
+            name = self._phase_id_to_name(phase_id)
+            context += f"- `{phase_id}`: {name}\n"
+        
+        context += "\n**Advanced Analytics:**\n"
+        for phase_id in advanced_phases[:5]:
+            name = self._phase_id_to_name(phase_id)
+            context += f"- `{phase_id}`: {name}\n"
+        
+        # Add KPI summary
+        context += "\n### Key Performance Indicators (KPIs)\n"
+        for kpi in self._spine_data['kpis'][:6]:  # Limit to 6 KPIs
+            context += f"- **{kpi['name']}**: {kpi['description'][:60]}...\n"
+        
+        # Add usage instructions
+        context += """
+### 🤖 For AI Agents
+
+**When working on Mind-Q:**
+
+1. **Understand phase context**: Use `get_guardian_context_for_request("your request")` to get relevant phase info
+2. **Plan changes**: Use `build_llm_change_context("your change")` for structured change guidance  
+3. **Check KPI impact**: Each change may affect business KPIs - verify which ones
+4. **Follow phase flow**: Changes in one phase may require updates in downstream phases
+
+**Available Commands:**
+```bash
+# Get context for your task
+python -m src.guardian_mindq . --context "your task description"
+
+# Plan a change
+python -m src.guardian_mindq . --plan-change "your change description"
+
+# Map request to phases
+python -m src.guardian_mindq . --map-request "your request"
+```
+
+"""
+        return context
     
     def refresh_all(self, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """
