@@ -917,7 +917,7 @@ class MindQGuardianAdapter:
         if any(kpi['category'] == 'business_critical' for kpi in affected_kpis):
             potential_risks.append("Business-critical KPIs affected - extra testing recommended")
         
-        return {
+        plan = {
             "change_request_id": change_request["id"],
             "files_to_edit": files_to_edit,
             "files_to_avoid": [],  # Could be populated with locked files
@@ -926,6 +926,14 @@ class MindQGuardianAdapter:
             "potential_risks": potential_risks,
             "recommended_tests": [f"Test {phase_id} phase" for phase_id in target_phases]
         }
+        
+        # Soft guidance: Create/update checklist (non-blocking)
+        try:
+            self.update_checklist(change_request, plan)
+        except Exception:
+            pass  # Soft: don't fail if checklist update fails
+        
+        return plan
     
     def record_change(self, change_request: Dict[str, Any], plan: Dict[str, Any], 
                      files_changed: Optional[List[str]] = None) -> str:
@@ -971,6 +979,16 @@ class MindQGuardianAdapter:
         # Save updated log
         with open(change_log_path, 'w', encoding='utf-8') as f:
             json.dump(changes, f, indent=2, ensure_ascii=False)
+        
+        # Soft guidance: Update checklist to mark as completed (non-blocking)
+        if files_changed:
+            try:
+                # Mark all items as done when change is completed
+                checklist = self.generate_checklist_for_change(change_request, plan)
+                items_done = list(range(len(checklist)))  # Mark all as done
+                self.update_checklist(change_request, plan, items_done)
+            except Exception:
+                pass  # Soft: don't fail if checklist update fails
         
         return str(change_log_path)
     
@@ -1081,6 +1099,14 @@ class MindQGuardianAdapter:
         for kpi in self._spine_data['kpis'][:6]:  # Limit to 6 KPIs
             context += f"- **{kpi['name']}**: {kpi['description'][:60]}...\n"
         
+        # Add current status summary (soft, non-blocking)
+        try:
+            status = self.get_status_summary()
+            if status and len(status) < 500:  # Only if compact
+                context += f"\n### Current Status\n\n{status}\n"
+        except Exception:
+            pass  # Soft: don't fail if status unavailable
+        
         # Add usage instructions
         context += """
 ### 🤖 For AI Agents
@@ -1106,6 +1132,208 @@ python -m src.guardian_mindq . --map-request "your request"
 
 """
         return context
+    
+    # ================================================================
+    # SOFT GUARDIAN LAYER - Status Tracking & Checklist Management
+    # ================================================================
+    
+    def _load_last_change_record(self) -> Optional[Dict]:
+        """
+        Load the last change record from .guardian/mindq_changes.json, if any.
+        
+        Returns:
+            Last change dict or None if no records exist
+        """
+        guardian_dir = self.repo_path / ".guardian"
+        changes_file = guardian_dir / "mindq_changes.json"
+        
+        if not changes_file.exists():
+            return None
+        
+        try:
+            with open(changes_file, 'r', encoding='utf-8') as f:
+                changes = json.load(f)
+                if isinstance(changes, list) and len(changes) > 0:
+                    return changes[-1]
+        except (json.JSONDecodeError, IOError):
+            pass
+        
+        return None
+    
+    def get_changed_files(self) -> List[str]:
+        """
+        Return a list of files changed in git compared to HEAD.
+        
+        Soft helper: if git is not available or errors, returns empty list.
+        
+        Returns:
+            List of changed file paths
+        """
+        import subprocess
+        
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--name-only", "HEAD"],
+                cwd=str(self.repo_path),
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                files = [f.strip() for f in result.stdout.strip().split('\n') if f.strip()]
+                return files
+        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+            pass
+        
+        return []
+    
+    def get_status_summary(self) -> str:
+        """
+        Get a compact status summary for inclusion in MDC.
+        
+        This provides a brief overview of the current change status
+        without overwhelming the MDC file.
+        
+        Returns:
+            Compact (<500 chars) status summary
+        """
+        last_change = self._load_last_change_record()
+        changed_files = self.get_changed_files()
+        
+        if not last_change and not changed_files:
+            return "📊 **Status**: Clean workspace - ready for new changes"
+        
+        summary = "📊 **Mind-Q Status**\n\n"
+        
+        if last_change:
+            goal = last_change.get('goal', 'Unknown')[:50]
+            phases = ', '.join(last_change.get('target_phases', [])[:3])
+            summary += f"**Last Change**: {goal}\n"
+            summary += f"**Target Phases**: {phases}\n"
+        
+        if changed_files:
+            file_count = len(changed_files)
+            summary += f"**Changed Files**: {file_count} file(s) modified\n"
+            summary += f"\n💡 *Tip: Review checklist in `.guardian/mindq_status.md`*\n"
+        
+        return summary
+    
+    def generate_checklist_for_change(self, change_request: Dict, plan: Dict) -> List[str]:
+        """
+        Generate a checklist for a change request.
+        
+        Args:
+            change_request: The change request dict
+            plan: The change plan dict
+            
+        Returns:
+            List of checklist items
+        """
+        checklist = []
+        
+        # Basic checklist items
+        checklist.append("[ ] Review change goal and target phases")
+        
+        # Phase-specific items
+        for phase_id in change_request.get('target_phases', []):
+            phase_name = self._phase_id_to_name(phase_id)
+            checklist.append(f"[ ] Review and test changes in {phase_name} ({phase_id})")
+        
+        # File-specific items
+        if plan.get('files_to_edit'):
+            checklist.append(f"[ ] Edit and test {len(plan['files_to_edit'])} identified files")
+        
+        # KPI items
+        if plan.get('affected_kpis'):
+            checklist.append(f"[ ] Verify {len(plan['affected_kpis'])} affected KPIs are tracked")
+        
+        # Risk items
+        if plan.get('potential_risks'):
+            checklist.append("[ ] Address identified risks and considerations")
+        
+        # Final items
+        checklist.append("[ ] Run tests for all affected phases")
+        checklist.append("[ ] Update documentation if needed")
+        checklist.append("[ ] Record change completion with `record_change()`")
+        
+        return checklist
+    
+    def update_checklist(self, change_request: Dict, plan: Dict, items_done: Optional[List[int]] = None) -> str:
+        """
+        Update or create checklist in .guardian/mindq_status.md.
+        
+        Args:
+            change_request: The change request dict
+            plan: The change plan dict
+            items_done: List of 0-based indices of completed items (optional)
+            
+        Returns:
+            Path to the status file
+        """
+        guardian_dir = self.repo_path / ".guardian"
+        guardian_dir.mkdir(exist_ok=True)
+        
+        status_file = guardian_dir / "mindq_status.md"
+        
+        # Generate checklist
+        checklist = self.generate_checklist_for_change(change_request, plan)
+        
+        # Mark items as done if specified
+        if items_done:
+            for idx in items_done:
+                if 0 <= idx < len(checklist):
+                    checklist[idx] = checklist[idx].replace("[ ]", "[x]", 1)
+        
+        # Build status document
+        content = f"""# Mind-Q Change Status
+
+**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+## Current Change
+
+**ID**: `{change_request.get('id', 'N/A')}`  
+**Goal**: {change_request.get('goal', 'N/A')}  
+**Target Phases**: {', '.join(change_request.get('target_phases', []))}  
+**Created**: {change_request.get('created_at', 'N/A')}
+
+## Checklist
+
+"""
+        for item in checklist:
+            content += f"{item}\n"
+        
+        content += f"""
+
+## Files to Edit ({len(plan.get('files_to_edit', []))})
+
+"""
+        for file_path in plan.get('files_to_edit', []):
+            content += f"- `{file_path}`\n"
+        
+        if plan.get('affected_kpis'):
+            content += f"\n## Affected KPIs ({len(plan['affected_kpis'])})\n\n"
+            for kpi_name in plan['affected_kpis']:
+                content += f"- {kpi_name}\n"
+        
+        if plan.get('potential_risks'):
+            content += f"\n## ⚠️ Risks & Considerations\n\n"
+            for risk in plan['potential_risks']:
+                content += f"- {risk}\n"
+        
+        content += f"""
+
+---
+
+💡 **Tip**: Update this checklist as you complete items. You can mark items as done by changing `[ ]` to `[x]`.
+
+📝 **Record**: When done, call `record_change()` to log this change in the audit trail.
+"""
+        
+        # Write to file
+        with open(status_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        return str(status_file)
     
     def refresh_all(self, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -1297,6 +1525,24 @@ def main():
         print(f"   Mapped to phases: {', '.join(change_req['target_phases'])}")
         print(f"   Files to edit: {len(plan['files_to_edit'])}")
         print(f"   Affected KPIs: {', '.join(plan['affected_kpis'][:3])}...")
+        
+        # 8. Soft guardian layer demo (NEW)
+        print("\n8️⃣ Soft Guardian Layer (NEW):")
+        print("   📊 Status tracking & checklist management")
+        
+        # Show status
+        status = adapter.get_status_summary()
+        print(f"   {status.split(chr(10))[0]}")  # First line only
+        
+        # Show checklist location
+        guardian_dir = adapter.repo_path / ".guardian"
+        status_file = guardian_dir / "mindq_status.md"
+        if status_file.exists():
+            print(f"   ✅ Checklist created: .guardian/mindq_status.md")
+            checklist = adapter.generate_checklist_for_change(change_req, plan)
+            print(f"   ✅ {len(checklist)} checklist items generated")
+        else:
+            print(f"   📝 Checklist will be created on first plan_change()")
         
         print("\n✨ Demo complete!")
     
