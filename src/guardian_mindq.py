@@ -17,9 +17,24 @@ import os
 import re
 import json
 import yaml
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
+from dataclasses import dataclass
+
+
+@dataclass
+class MindQStatus:
+    """
+    Structured status representation for Mind-Q Guardian.
+    Used for compact MDC integration.
+    """
+    status: str  # 'NO_CHANGES' | 'NO_PLAN_FOR_CHANGES' | 'PLAN_VIOLATIONS' | 'ON_TRACK'
+    last_goal: str  # Truncated to 100 chars
+    target_phases: List[str]
+    planned_files_count: int
+    extra_files_count: int
 
 
 class MindQGuardianAdapter:
@@ -1064,73 +1079,114 @@ class MindQGuardianAdapter:
         This method is called by GuardianEnhanced to add Mind-Q pipeline
         context to IDE rule files (.cursor/rules, .windsurf/rules, etc.)
         
+        Uses scan_guardian_status() for compact, status-aware MDC integration.
+        
         Returns:
-            Formatted Mind-Q context section for MDC
+            Formatted Mind-Q context section for MDC (compact ~20 lines)
         """
         if self._spine_data is None:
             self.build_spine()
         
-        # Build compact Mind-Q context
+        # Get structured status
+        status = self.scan_guardian_status()
+        
+        # Build compact Mind-Q context with status-aware messaging
         context = """
-## 🔧 MIND-Q PIPELINE CONTEXT
+## 🔧 MIND-Q PIPELINE STATUS
 
-> This is a Mind-Q V4.1 logistics data pipeline project.
-> The pipeline is organized into sequential phases for data processing.
-
-### Phase Structure
+> This is a Mind-Q V4.1 logistics data pipeline project (21 phases, 8 KPIs tracked).
 """
         
-        # Add phases grouped by category
-        core_phases = [p for p in self.phase_sequence if p.split('_')[0] in ['01', '02', '03', '04', '05', '06', '07']]
-        advanced_phases = [p for p in self.phase_sequence if p.split('_')[0] in ['08', '09', '10', '11', '12']]
+        # Status-specific messaging
+        if status.status == 'NO_CHANGES':
+            context += f"""
+**Status**: ✅ NO_CHANGES (ready for new changes)
+
+**Pipeline**: 21 phases (01_ingestion → 12_routing)
+**KPIs Tracked**: RTO%, SLA, COD, PSI, NZV, Delivery Success, Hub Efficiency, Data Quality
+
+✅ **Ready**: No uncommitted changes detected.
+
+**📋 Next Steps**:
+1. Open and review `.guardian/mindq_status.md` for any previous checklist
+2. Plan new changes with: `python -m src.guardian_mindq . --plan-change "Your change description"`
+"""
         
-        context += "\n**Core Pipeline:**\n"
-        for phase_id in core_phases[:10]:  # Limit for context size
-            name = self._phase_id_to_name(phase_id)
-            context += f"- `{phase_id}`: {name}\n"
+        elif status.status == 'NO_PLAN_FOR_CHANGES':
+            context += f"""
+**Status**: ⚠️  NO_PLAN_FOR_CHANGES ({status.extra_files_count} files changed without plan)
+
+**Changed Files**: {status.extra_files_count} file(s) modified (0 planned, {status.extra_files_count} extra)
+
+⚠️  **Warning**: You have file changes without a documented change plan.
+Large structural changes without a plan can lead to issues.
+
+**📋 Action Required**:
+1. Open and review `.guardian/mindq_status.md` for current status
+2. Consider creating a change plan with: `python -m src.guardian_mindq . --plan-change "Your change description"`
+3. Review checklist before making large structural changes
+4. Avoid touching multiple phases without understanding dependencies
+"""
         
-        context += "\n**Advanced Analytics:**\n"
-        for phase_id in advanced_phases[:5]:
-            name = self._phase_id_to_name(phase_id)
-            context += f"- `{phase_id}`: {name}\n"
+        elif status.status == 'PLAN_VIOLATIONS':
+            phases_str = ', '.join(status.target_phases) if status.target_phases else 'None'
+            context += f"""
+**Status**: 🔔 PLAN_VIOLATIONS
+
+**Last Change**: "{status.last_goal}"
+**Target Phases**: {phases_str}
+**Files**: {status.planned_files_count} changed ({status.planned_files_count} planned, {status.extra_files_count} extra) ⚠️
+
+🔔 **Alert**: Extra files detected outside the documented plan.
+
+**📋 Important**:
+1. Open and review `.guardian/mindq_status.md` to see which files are extra
+2. Review if extra files are related to your change goal
+3. Consider updating the plan if scope changed
+4. Mark checklist items complete as you verify them
+"""
         
-        # Add KPI summary
-        context += "\n### Key Performance Indicators (KPIs)\n"
-        for kpi in self._spine_data['kpis'][:6]:  # Limit to 6 KPIs
-            context += f"- **{kpi['name']}**: {kpi['description'][:60]}...\n"
+        else:  # ON_TRACK
+            phases_str = ', '.join(status.target_phases) if status.target_phases else 'None'
+            context += f"""
+**Status**: ✅ ON_TRACK
+
+**Last Change**: "{status.last_goal}"
+**Target Phases**: {phases_str}
+**Files**: {status.planned_files_count} changed ({status.planned_files_count} planned, 0 extra) ✅
+
+✅ **Good Progress**: Following documented plan
+
+**📋 Next Steps**:
+1. Open and review `.guardian/mindq_status.md` for checklist progress
+2. Continue with planned changes
+3. Mark checklist items complete as you finish them
+4. Record completion with: `record_change()` when done
+"""
         
-        # Add current status summary (soft, non-blocking)
-        try:
-            status = self.get_status_summary()
-            if status and len(status) < 500:  # Only if compact
-                context += f"\n### Current Status\n\n{status}\n"
-        except Exception:
-            pass  # Soft: don't fail if status unavailable
-        
-        # Add usage instructions
+        # Add usage instructions (compact)
         context += """
 ### 🤖 For AI Agents
 
-**When working on Mind-Q:**
-
-1. **Understand phase context**: Use `get_guardian_context_for_request("your request")` to get relevant phase info
-2. **Plan changes**: Use `build_llm_change_context("your change")` for structured change guidance  
-3. **Check KPI impact**: Each change may affect business KPIs - verify which ones
-4. **Follow phase flow**: Changes in one phase may require updates in downstream phases
-
-**Available Commands:**
+**Phase-Aware Commands:**
 ```bash
 # Get context for your task
-python -m src.guardian_mindq . --context "your task description"
+python -m src.guardian_mindq . --context "your task"
 
-# Plan a change
-python -m src.guardian_mindq . --plan-change "your change description"
+# Plan a change (creates checklist)
+python -m src.guardian_mindq . --plan-change "your change"
 
-# Map request to phases
-python -m src.guardian_mindq . --map-request "your request"
+# Check cleanup needed
+python -m src.guardian_mindq . --cleanup
+
+# Refresh docs after code changes
+python -m src.guardian_mindq . --refresh-docs
 ```
 
+**Important**: Always review `.guardian/mindq_status.md` before large changes.
+Cleanup reports are in `.guardian/mindq_cleanup.md` (NOT shown here to keep MDC compact).
 """
+        
         return context
     
     # ================================================================
@@ -1320,20 +1376,258 @@ python -m src.guardian_mindq . --map-request "your request"
             for risk in plan['potential_risks']:
                 content += f"- {risk}\n"
         
-        content += f"""
+        content += """
 
 ---
 
-💡 **Tip**: Update this checklist as you complete items. You can mark items as done by changing `[ ]` to `[x]`.
-
-📝 **Record**: When done, call `record_change()` to log this change in the audit trail.
 """
+        content += "💡 **Tip**: Update this checklist as you complete items. You can mark items as done by changing `[ ]` to `[x]`.\n\n"
+        content += "📝 **Record**: When done, call `record_change()` to log this change in the audit trail.\n"
         
         # Write to file
         with open(status_file, 'w', encoding='utf-8') as f:
             f.write(content)
         
         return str(status_file)
+    
+    def scan_guardian_status(self) -> MindQStatus:
+        """
+        Scan current Mind-Q Guardian status for compact MDC integration.
+        
+        Returns structured status with:
+        - status code (NO_CHANGES, NO_PLAN_FOR_CHANGES, PLAN_VIOLATIONS, ON_TRACK)
+        - last change goal (truncated to 100 chars)
+        - target phases
+        - planned vs extra files count
+        """
+        last_change = self._load_last_change_record()
+        changed_files = self.get_changed_files()
+        
+        # Determine status
+        if not changed_files:
+            # No changes in git
+            status_code = 'NO_CHANGES'
+            last_goal = ''
+            target_phases = []
+            planned_count = 0
+            extra_count = 0
+        elif not last_change:
+            # Changes exist but no documented plan
+            status_code = 'NO_PLAN_FOR_CHANGES'
+            last_goal = ''
+            target_phases = []
+            planned_count = 0
+            extra_count = len(changed_files)
+        else:
+            # Have a documented change
+            last_goal = last_change.get('goal', '')[:100]  # Truncate to 100 chars
+            target_phases = last_change.get('target_phases', [])
+            
+            # Check if files match plan
+            plan = last_change.get('plan', {})
+            planned_files = set(plan.get('files_to_edit', []))
+            changed_set = set(changed_files)
+            
+            # Count planned vs extra
+            planned_count = len(changed_set & planned_files)
+            extra_count = len(changed_set - planned_files)
+            
+            if extra_count > 0:
+                status_code = 'PLAN_VIOLATIONS'
+            else:
+                status_code = 'ON_TRACK'
+        
+        return MindQStatus(
+            status=status_code,
+            last_goal=last_goal,
+            target_phases=target_phases,
+            planned_files_count=planned_count,
+            extra_files_count=extra_count
+        )
+    
+    def run_cleanup(self) -> Dict[str, Any]:
+        """
+        Run cleanup analysis on Mind-Q project (non-blocking).
+        
+        Identifies:
+        - Unused phase directories
+        - Outdated phase cards (older than implementation)
+        - Missing phase cards
+        - Stale contracts
+        
+        Returns cleanup report dict and saves to .guardian/mindq_cleanup.md
+        Does NOT inject anything into MDC - agents should review the file.
+        """
+        report = {
+            "timestamp": datetime.now().isoformat(),
+            "unused_phases": [],
+            "outdated_cards": [],
+            "missing_cards": [],
+            "stale_contracts": [],
+            "recommendations": []
+        }
+        
+        try:
+            # Check for unused phase directories
+            phases_dir = self.repo_path / "phases"
+            if phases_dir.exists():
+                for phase_dir in phases_dir.iterdir():
+                    if phase_dir.is_dir() and phase_dir.name.startswith(('0', '1')):
+                        phase_id = phase_dir.name
+                        # Check if phase is in spine
+                        if phase_id not in [p['id'] for p in self._spine_data.get('phases', [])]:
+                            report["unused_phases"].append(phase_id)
+            
+            # Check for outdated/missing phase cards
+            docs_phases = self.repo_path / "docs" / "phases"
+            for phase in self._spine_data.get('phases', []):
+                phase_id = phase['id']
+                card_path = docs_phases / f"{phase_id}.md"
+                impl_path = self.repo_path / "phases" / phase_id / "impl.py"
+                
+                if not card_path.exists():
+                    report["missing_cards"].append(phase_id)
+                elif impl_path.exists():
+                    # Check if card is older than implementation
+                    try:
+                        card_mtime = card_path.stat().st_mtime
+                        impl_mtime = impl_path.stat().st_mtime
+                        if card_mtime < impl_mtime:
+                            report["outdated_cards"].append(phase_id)
+                    except:
+                        pass
+            
+            # Generate recommendations
+            if report["unused_phases"]:
+                report["recommendations"].append(
+                    f"Consider removing or documenting {len(report['unused_phases'])} unused phase directories"
+                )
+            if report["outdated_cards"]:
+                report["recommendations"].append(
+                    f"Refresh {len(report['outdated_cards'])} outdated phase cards with: python -m src.guardian_mindq . --refresh-docs"
+                )
+            if report["missing_cards"]:
+                report["recommendations"].append(
+                    f"Generate {len(report['missing_cards'])} missing phase cards"
+                )
+            
+            # Save report to .guardian/mindq_cleanup.md
+            guardian_dir = self.repo_path / ".guardian"
+            guardian_dir.mkdir(exist_ok=True)
+            
+            cleanup_file = guardian_dir / "mindq_cleanup.md"
+            content = f"""# 🧹 Mind-Q Cleanup Report
+
+**Generated**: {report['timestamp']}
+
+## Summary
+
+- **Unused Phases**: {len(report['unused_phases'])}
+- **Outdated Cards**: {len(report['outdated_cards'])}
+- **Missing Cards**: {len(report['missing_cards'])}
+
+"""
+            
+            if report['unused_phases']:
+                content += "## 🗑️ Unused Phase Directories\n\n"
+                for phase_id in report['unused_phases']:
+                    content += f"- `phases/{phase_id}/` - Not in current pipeline spine\n"
+                content += "\n"
+            
+            if report['outdated_cards']:
+                content += "## 📅 Outdated Phase Cards\n\n"
+                for phase_id in report['outdated_cards']:
+                    content += f"- `{phase_id}` - Implementation newer than documentation\n"
+                content += "\n"
+            
+            if report['missing_cards']:
+                content += "## ❌ Missing Phase Cards\n\n"
+                for phase_id in report['missing_cards']:
+                    content += f"- `{phase_id}` - No documentation card found\n"
+                content += "\n"
+            
+            if report['recommendations']:
+                content += "## 💡 Recommendations\n\n"
+                for rec in report['recommendations']:
+                    content += f"- {rec}\n"
+                content += "\n"
+            
+            content += "---\n\n"
+            content += "💡 **Note**: This is an informational report. No automatic cleanup is performed.\n"
+            content += "Review the findings and take action as appropriate for your project.\n\n"
+            content += "🔧 **Actions**:\n"
+            content += "- Refresh outdated docs: `python -m src.guardian_mindq . --refresh-docs`\n"
+            content += "- Clean unused phases manually after verification\n"
+            
+            with open(cleanup_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            report["cleanup_file"] = str(cleanup_file)
+            
+        except Exception as e:
+            report["error"] = str(e)
+        
+        return report
+    
+    def refresh_docs_after_changes(self, phases_to_refresh: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Refresh Mind-Q documentation (spine + phase cards) after real code changes.
+        
+        Use this after making actual changes to phase implementations to keep
+        documentation in sync.
+        
+        Args:
+            phases_to_refresh: Optional list of specific phase IDs to refresh.
+                              If None, refreshes all phases.
+        
+        Returns:
+            Dict with paths to refreshed documentation
+        """
+        results = {
+            "spine_refreshed": False,
+            "spine_path": None,
+            "phase_cards_refreshed": [],
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        try:
+            # Always rebuild spine to pick up any structural changes
+            self.build_spine()
+            results["spine_path"] = self.save_spine()
+            results["spine_refreshed"] = True
+            
+            # Refresh phase cards
+            if phases_to_refresh:
+                # Refresh specific phases
+                for phase_id in phases_to_refresh:
+                    try:
+                        card_path = self.save_phase_card(phase_id)
+                        results["phase_cards_refreshed"].append({
+                            "phase_id": phase_id,
+                            "path": card_path,
+                            "status": "success"
+                        })
+                    except Exception as e:
+                        results["phase_cards_refreshed"].append({
+                            "phase_id": phase_id,
+                            "status": "error",
+                            "error": str(e)
+                        })
+            else:
+                # Refresh all phases
+                all_cards = self.generate_all_phase_cards()
+                for card_path in all_cards:
+                    phase_id = Path(card_path).stem
+                    results["phase_cards_refreshed"].append({
+                        "phase_id": phase_id,
+                        "path": card_path,
+                        "status": "success"
+                    })
+            
+        except Exception as e:
+            results["error"] = str(e)
+        
+        return results
     
     def refresh_all(self, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -1371,6 +1665,9 @@ def main():
     parser.add_argument("--build-spine", action="store_true", help="Build and save spine")
     parser.add_argument("--generate-cards", action="store_true", help="Generate all phase cards")
     parser.add_argument("--refresh-all", action="store_true", help="Refresh all artifacts")
+    parser.add_argument("--refresh-docs", action="store_true", help="Refresh documentation after code changes")
+    parser.add_argument("--cleanup", action="store_true", help="Run cleanup analysis (non-blocking)")
+    parser.add_argument("--status", action="store_true", help="Show current Guardian status")
     parser.add_argument("--phase", help="Generate card for specific phase")
     parser.add_argument("--context", help="Get context for user request")
     parser.add_argument("--kpi-mapping", action="store_true", help="Show KPI to phase mapping")
@@ -1399,6 +1696,54 @@ def main():
         print(f"✅ Refreshed all artifacts:")
         print(f"   Spine: {results['spine_path']}")
         print(f"   Phase cards: {len(results['phase_cards'])}")
+    
+    elif args.refresh_docs:
+        print("🔄 Refreshing documentation after code changes...")
+        results = adapter.refresh_docs_after_changes()
+        if results.get('error'):
+            print(f"❌ Error: {results['error']}")
+        else:
+            print(f"✅ Documentation refreshed:")
+            print(f"   Spine: {results['spine_refreshed']}")
+            print(f"   Phase cards: {len(results['phase_cards_refreshed'])}")
+            for card_info in results['phase_cards_refreshed']:
+                if card_info['status'] == 'success':
+                    print(f"      ✅ {card_info['phase_id']}")
+                else:
+                    print(f"      ❌ {card_info['phase_id']}: {card_info.get('error', 'Unknown error')}")
+    
+    elif args.cleanup:
+        print("🧹 Running cleanup analysis...")
+        report = adapter.run_cleanup()
+        if report.get('error'):
+            print(f"❌ Error: {report['error']}")
+        else:
+            print(f"\n📊 Cleanup Summary:")
+            print(f"   Unused phases: {len(report['unused_phases'])}")
+            print(f"   Outdated cards: {len(report['outdated_cards'])}")
+            print(f"   Missing cards: {len(report['missing_cards'])}")
+            
+            if report['recommendations']:
+                print(f"\n💡 Recommendations:")
+                for rec in report['recommendations']:
+                    print(f"   - {rec}")
+            
+            if report.get('cleanup_file'):
+                print(f"\n📄 Full report saved to: {report['cleanup_file']}")
+                print(f"   (Review this file for details, NOT included in MDC)")
+    
+    elif args.status:
+        print("📊 Mind-Q Guardian Status\n")
+        status = adapter.scan_guardian_status()
+        print(f"Status: {status.status}")
+        if status.last_goal:
+            print(f"Last Goal: {status.last_goal}")
+        if status.target_phases:
+            print(f"Target Phases: {', '.join(status.target_phases)}")
+        print(f"Files: {status.planned_files_count} planned, {status.extra_files_count} extra")
+        
+        # Show compact status summary
+        print(f"\n{adapter.get_status_summary()}")
     
     elif args.phase:
         card_path = adapter.save_phase_card(args.phase)
@@ -1526,23 +1871,40 @@ def main():
         print(f"   Files to edit: {len(plan['files_to_edit'])}")
         print(f"   Affected KPIs: {', '.join(plan['affected_kpis'][:3])}...")
         
-        # 8. Soft guardian layer demo (NEW)
-        print("\n8️⃣ Soft Guardian Layer (NEW):")
+        # 8. Soft guardian layer demo
+        print("\n8️⃣ Soft Guardian Layer:")
         print("   📊 Status tracking & checklist management")
         
-        # Show status
-        status = adapter.get_status_summary()
-        print(f"   {status.split(chr(10))[0]}")  # First line only
+        # Show status using new API
+        status = adapter.scan_guardian_status()
+        print(f"   Status: {status.status}")
+        if status.last_goal:
+            print(f"   Last goal: {status.last_goal[:50]}...")
         
         # Show checklist location
         guardian_dir = adapter.repo_path / ".guardian"
         status_file = guardian_dir / "mindq_status.md"
         if status_file.exists():
-            print(f"   ✅ Checklist created: .guardian/mindq_status.md")
-            checklist = adapter.generate_checklist_for_change(change_req, plan)
-            print(f"   ✅ {len(checklist)} checklist items generated")
+            print(f"   ✅ Checklist: .guardian/mindq_status.md")
         else:
-            print(f"   📝 Checklist will be created on first plan_change()")
+            print(f"   📝 Checklist created automatically on plan_change()")
+        
+        # 9. Cleanup analysis demo (NEW)
+        print("\n9️⃣ Cleanup Analysis (NEW):")
+        cleanup_report = adapter.run_cleanup()
+        if not cleanup_report.get('error'):
+            print(f"   Unused phases: {len(cleanup_report['unused_phases'])}")
+            print(f"   Outdated cards: {len(cleanup_report['outdated_cards'])}")
+            print(f"   Missing cards: {len(cleanup_report['missing_cards'])}")
+            if cleanup_report.get('cleanup_file'):
+                print(f"   📄 Full report: .guardian/mindq_cleanup.md")
+                print(f"   (Not included in MDC - agents review separately)")
+        
+        # 10. Documentation refresh demo (NEW)
+        print("\n🔟 Documentation Refresh (NEW):")
+        print("   After code changes, refresh with:")
+        print("   python -m src.guardian_mindq . --refresh-docs")
+        print("   Keeps spine + phase cards in sync with implementation")
         
         print("\n✨ Demo complete!")
     
