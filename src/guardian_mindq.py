@@ -79,7 +79,8 @@ class MindQGuardianAdapter:
             Dictionary containing spine structure with phases, flows, and KPIs
         """
         if not self.guide_path.exists():
-            return self._build_default_spine()
+            self._spine_data = self._build_default_spine()
+            return self._spine_data
         
         with open(self.guide_path, 'r', encoding='utf-8') as f:
             guide_content = f.read()
@@ -451,32 +452,79 @@ class MindQGuardianAdapter:
         }
     
     def _find_phase_code_files(self, phase_id: str) -> List[str]:
-        """Find main code files for a phase."""
-        phase_dir = self.phases_path / phase_id
+        """Find main code files for a phase with extended discovery."""
         code_files = []
         
-        if not phase_dir.exists():
-            return code_files
+        # 1. Standard phase directory
+        phase_dir = self.phases_path / phase_id
+        if phase_dir.exists():
+            # Look for impl.py, run.py, or other Python files
+            for pattern in ["impl.py", "run.py", "*.py"]:
+                for file_path in phase_dir.glob(pattern):
+                    if file_path.is_file() and not file_path.name.startswith('__'):
+                        rel_path = file_path.relative_to(self.repo_path)
+                        code_files.append(str(rel_path))
+            
+            # Look for config files
+            for pattern in ["config.yaml", "config.json", "*.yaml", "*.json"]:
+                for file_path in phase_dir.glob(pattern):
+                    if file_path.is_file():
+                        rel_path = file_path.relative_to(self.repo_path)
+                        code_files.append(str(rel_path))
         
-        # Look for impl.py, run.py, or other Python files
-        for pattern in ["impl.py", "run.py", "*.py"]:
-            for file_path in phase_dir.glob(pattern):
-                if file_path.is_file() and not file_path.name.startswith('__'):
-                    rel_path = file_path.relative_to(self.repo_path)
-                    code_files.append(str(rel_path))
+        # 2. Extended paths - phase-specific contracts and services
+        PHASE_EXTRA_PATHS = {
+            "05_missing": ["contracts/impute/", "contracts/nzv/"],
+            "06_standardize": ["contracts/nzv/"],
+            "08_insights": ["contracts/analytics/", "backend/src/app/services/stage_08_insights/"],
+            "09_business_validation": ["contracts/sla/", "contracts/payment/"],
+        }
         
-        # Look for config files
-        for pattern in ["config.yaml", "config.json", "*.yaml", "*.json"]:
-            for file_path in phase_dir.glob(pattern):
-                if file_path.is_file():
-                    rel_path = file_path.relative_to(self.repo_path)
-                    code_files.append(str(rel_path))
-                    if len(code_files) >= 6:
-                        break
-            if len(code_files) >= 6:
-                break
+        if phase_id in PHASE_EXTRA_PATHS:
+            for extra_path in PHASE_EXTRA_PATHS[phase_id]:
+                extra_dir = self.repo_path / extra_path
+                if extra_dir.exists():
+                    for pattern in ["*.py", "*.yaml", "*.json"]:
+                        for file_path in extra_dir.glob(pattern):
+                            if file_path.is_file() and not file_path.name.startswith('__'):
+                                rel_path = file_path.relative_to(self.repo_path)
+                                if str(rel_path) not in code_files:
+                                    code_files.append(str(rel_path))
         
-        return code_files
+        # 3. Generic heuristic: search backend/src/app/services/ for phase number
+        phase_num = phase_id.split('_')[0]  # e.g., "08" from "08_insights"
+        services_path = self.repo_path / "backend" / "src" / "app" / "services"
+        if services_path.exists():
+            for service_dir in services_path.iterdir():
+                if service_dir.is_dir() and phase_num in service_dir.name:
+                    for pattern in ["*.py", "*.yaml"]:
+                        for file_path in service_dir.glob(pattern):
+                            if file_path.is_file() and not file_path.name.startswith('__'):
+                                rel_path = file_path.relative_to(self.repo_path)
+                                if str(rel_path) not in code_files:
+                                    code_files.append(str(rel_path))
+        
+        # 4. Search contracts/ for YAML files mentioned in phase impl
+        contracts_path = self.repo_path / "contracts"
+        if contracts_path.exists() and len(code_files) < 6:
+            for yaml_file in contracts_path.rglob("*.yaml"):
+                # Check if phase_id is mentioned in filename or content
+                if phase_id in yaml_file.name or phase_num in yaml_file.name:
+                    rel_path = yaml_file.relative_to(self.repo_path)
+                    if str(rel_path) not in code_files:
+                        code_files.append(str(rel_path))
+        
+        # Limit to 6 entries total and deduplicate
+        seen = set()
+        unique_files = []
+        for f in code_files:
+            if f not in seen:
+                seen.add(f)
+                unique_files.append(f)
+                if len(unique_files) >= 6:
+                    break
+        
+        return unique_files
     
     def _get_upstream_phases(self, phase_id: str) -> List[str]:
         """Get upstream phases for a given phase."""
@@ -740,6 +788,179 @@ class MindQGuardianAdapter:
         
         return impacted_kpis
     
+    def map_request_to_phases(self, user_request: str) -> List[str]:
+        """
+        Map a user request to relevant phases in the pipeline.
+        
+        Analyzes the request for:
+        - KPI mentions → adds phases from impacted_by
+        - Phase ID/name mentions → adds those phases
+        
+        Args:
+            user_request: User's request or query
+            
+        Returns:
+            Deduplicated list of phase IDs (max 4 phases)
+        """
+        if self._spine_data is None:
+            self.build_spine()
+        
+        request_lower = user_request.lower()
+        relevant_phases = []
+        
+        # Check for KPI mentions
+        for kpi in self._spine_data['kpis']:
+            kpi_name_lower = kpi['name'].lower()
+            kpi_desc_words = kpi['description'].lower().split()[:5]
+            
+            if kpi_name_lower in request_lower or any(word in request_lower for word in kpi_desc_words):
+                # Add phases that impact this KPI
+                if 'impacted_by' in kpi:
+                    relevant_phases.extend(kpi['impacted_by'])
+        
+        # Check for direct phase mentions
+        for phase_id in self.phase_sequence:
+            phase_name = self._phase_id_to_name(phase_id).lower()
+            phase_num = phase_id.split('_')[0]
+            
+            if (phase_id in request_lower or 
+                phase_num in request_lower or
+                any(word in request_lower for word in phase_name.split())):
+                relevant_phases.append(phase_id)
+        
+        # Deduplicate while preserving order
+        seen = set()
+        unique_phases = []
+        for phase in relevant_phases:
+            if phase not in seen:
+                seen.add(phase)
+                unique_phases.append(phase)
+                if len(unique_phases) >= 4:
+                    break
+        
+        return unique_phases
+    
+    def build_change_request(self, user_request: str) -> Dict[str, Any]:
+        """
+        Build a structured change request from a user query.
+        
+        Args:
+            user_request: User's request description
+            
+        Returns:
+            Change request dictionary with metadata
+        """
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        return {
+            "id": f"mqr_{timestamp}",
+            "goal": user_request[:100],  # Truncate long requests
+            "full_request": user_request,
+            "target_phases": self.map_request_to_phases(user_request),
+            "non_goals": [],  # User can populate this
+            "allowed_operations": ["refactor", "bugfix"],
+            "created_at": datetime.now().isoformat(),
+            "status": "planned"
+        }
+    
+    def plan_change(self, change_request: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a change plan from a change request.
+        
+        Identifies:
+        - Files to edit (from target phases)
+        - Affected KPIs
+        - Potential risks
+        
+        Args:
+            change_request: Change request dictionary from build_change_request
+            
+        Returns:
+            Change plan dictionary
+        """
+        target_phases = change_request.get("target_phases", [])
+        
+        # Collect files from all target phases
+        files_to_edit = []
+        for phase_id in target_phases:
+            card = self.generate_phase_card(phase_id)
+            files_to_edit.extend(card.get("code_files", []))
+        
+        # Deduplicate files
+        files_to_edit = list(set(files_to_edit))
+        
+        # Collect affected KPIs
+        affected_kpis = []
+        for phase_id in target_phases:
+            phase_kpis = self.get_phase_kpi_impact(phase_id)
+            for kpi in phase_kpis:
+                if kpi not in affected_kpis:
+                    affected_kpis.append(kpi)
+        
+        # Identify potential risks
+        potential_risks = []
+        if len(target_phases) > 2:
+            potential_risks.append("Multiple phases affected - ensure consistency across changes")
+        if any(kpi['category'] == 'business_critical' for kpi in affected_kpis):
+            potential_risks.append("Business-critical KPIs affected - extra testing recommended")
+        
+        return {
+            "change_request_id": change_request["id"],
+            "files_to_edit": files_to_edit,
+            "files_to_avoid": [],  # Could be populated with locked files
+            "affected_kpis": [kpi['name'] for kpi in affected_kpis],
+            "affected_kpi_details": affected_kpis,
+            "potential_risks": potential_risks,
+            "recommended_tests": [f"Test {phase_id} phase" for phase_id in target_phases]
+        }
+    
+    def record_change(self, change_request: Dict[str, Any], plan: Dict[str, Any], 
+                     files_changed: Optional[List[str]] = None) -> str:
+        """
+        Record a change in the Guardian change log.
+        
+        Appends record to .guardian/mindq_changes.json for audit trail.
+        
+        Args:
+            change_request: Change request dictionary
+            plan: Change plan dictionary
+            files_changed: Optional list of actually changed files
+            
+        Returns:
+            Path to the change log file
+        """
+        guardian_dir = self.repo_path / ".guardian"
+        guardian_dir.mkdir(exist_ok=True)
+        
+        change_log_path = guardian_dir / "mindq_changes.json"
+        
+        # Load existing changes
+        if change_log_path.exists():
+            with open(change_log_path, 'r', encoding='utf-8') as f:
+                changes = json.load(f)
+        else:
+            changes = []
+        
+        # Create record
+        record = {
+            "id": change_request["id"],
+            "timestamp": datetime.now().isoformat(),
+            "goal": change_request["goal"],
+            "target_phases": change_request["target_phases"],
+            "files_planned": plan["files_to_edit"],
+            "files_changed": files_changed if files_changed else [],
+            "affected_kpis": plan["affected_kpis"],
+            "status": "completed" if files_changed else "planned"
+        }
+        
+        changes.append(record)
+        
+        # Save updated log
+        with open(change_log_path, 'w', encoding='utf-8') as f:
+            json.dump(changes, f, indent=2, ensure_ascii=False)
+        
+        return str(change_log_path)
+    
     def refresh_all(self, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """
         Refresh all Mind-Q Guardian artifacts.
@@ -780,6 +1001,8 @@ def main():
     parser.add_argument("--context", help="Get context for user request")
     parser.add_argument("--kpi-mapping", action="store_true", help="Show KPI to phase mapping")
     parser.add_argument("--phase-kpis", help="Show KPIs impacted by specific phase")
+    parser.add_argument("--map-request", help="Map a user request to relevant phases")
+    parser.add_argument("--plan-change", help="Create a change plan from a user request")
     parser.add_argument("--demo", action="store_true", help="Run demo showcasing all features")
     
     args = parser.parse_args()
@@ -838,6 +1061,45 @@ def main():
         else:
             print(f"No KPIs directly impacted by {args.phase_kpis}")
     
+    elif args.map_request:
+        phases = adapter.map_request_to_phases(args.map_request)
+        print(f"🗺️  Request: '{args.map_request}'")
+        print(f"\n📍 Mapped to phases:")
+        for phase in phases:
+            print(f"   - {phase}: {adapter._phase_id_to_name(phase)}")
+        if not phases:
+            print("   (No specific phases identified)")
+    
+    elif args.plan_change:
+        print(f"📋 Creating change plan for: '{args.plan_change}'")
+        print("=" * 60)
+        
+        # Build change request
+        change_req = adapter.build_change_request(args.plan_change)
+        print(f"\n1️⃣ Change Request:")
+        print(f"   ID: {change_req['id']}")
+        print(f"   Target phases: {', '.join(change_req['target_phases']) if change_req['target_phases'] else 'None detected'}")
+        
+        # Create plan
+        plan = adapter.plan_change(change_req)
+        print(f"\n2️⃣ Change Plan:")
+        print(f"   Files to edit: {len(plan['files_to_edit'])}")
+        for f in plan['files_to_edit'][:5]:
+            print(f"      - {f}")
+        if len(plan['files_to_edit']) > 5:
+            print(f"      ... and {len(plan['files_to_edit']) - 5} more")
+        
+        print(f"\n   Affected KPIs: {', '.join(plan['affected_kpis']) if plan['affected_kpis'] else 'None'}")
+        
+        if plan['potential_risks']:
+            print(f"\n   ⚠️  Potential Risks:")
+            for risk in plan['potential_risks']:
+                print(f"      - {risk}")
+        
+        # Record the plan
+        log_path = adapter.record_change(change_req, plan)
+        print(f"\n✅ Change plan recorded to: {log_path}")
+    
     elif args.demo:
         print("🎯 Mind-Q Guardian Adapter Demo")
         print("=" * 50)
@@ -872,6 +1134,23 @@ def main():
         results = adapter.refresh_all()
         print(f"   ✅ Spine: {Path(results['spine_path']).name}")
         print(f"   ✅ Phase cards: {len(results['phase_cards'])}")
+        
+        # 6. Extended file discovery demo
+        print("\n6️⃣ Extended file discovery (05_missing):")
+        card = adapter.generate_phase_card("05_missing")
+        print(f"   Found {len(card['code_files'])} code files (including contracts)")
+        for f in card['code_files'][:3]:
+            print(f"      - {f}")
+        
+        # 7. Change planning demo
+        print("\n7️⃣ Change planning example:")
+        test_request = "Fix PSI calculation in missing value imputation"
+        change_req = adapter.build_change_request(test_request)
+        plan = adapter.plan_change(change_req)
+        print(f"   Request: '{test_request}'")
+        print(f"   Mapped to phases: {', '.join(change_req['target_phases'])}")
+        print(f"   Files to edit: {len(plan['files_to_edit'])}")
+        print(f"   Affected KPIs: {', '.join(plan['affected_kpis'][:3])}...")
         
         print("\n✨ Demo complete!")
     
