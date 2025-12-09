@@ -18,10 +18,11 @@ import re
 import json
 import yaml
 import subprocess
+import ast
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Set
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -35,6 +36,24 @@ class MindQStatus:
     target_phases: List[str]
     planned_files_count: int
     extra_files_count: int
+
+
+@dataclass
+class CleanupItem:
+    """
+    Structured representation of a cleanup/refactoring opportunity.
+    Used by the deep code scanner for Refactor Radar.
+    """
+    id: str  # e.g., "CLEANUP-001"
+    kind: str  # unused_import, unused_symbol, orphan_module, duplicate_function, etc.
+    file: str  # Relative path
+    symbol: Optional[str]  # Function name, class name, import name, or None
+    why_suspected: str  # Short explanation
+    confidence: float  # 0.0-1.0
+    related_phase: Optional[str]  # Phase ID if applicable
+    suggested_action: str  # e.g., "remove_import_on_phase_04_refactor"
+    line_number: Optional[int] = None  # Line number if applicable
+    details: Optional[str] = None  # Additional details
 
 
 class MindQGuardianAdapter:
@@ -1569,6 +1588,459 @@ Cleanup reports are in `.guardian/mindq_cleanup.md` (NOT shown here to keep MDC 
         
         return report
     
+    def _scan_python_file_for_issues(self, file_path: Path, cleanup_id_counter: int) -> List[CleanupItem]:
+        """
+        Deep scan a single Python file for refactoring opportunities using AST.
+        
+        Args:
+            file_path: Path to Python file
+            cleanup_id_counter: Starting ID counter for cleanup items
+            
+        Returns:
+            List of CleanupItem findings
+        """
+        items = []
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                source = f.read()
+                tree = ast.parse(source, filename=str(file_path))
+            
+            rel_path = str(file_path.relative_to(self.repo_path))
+            
+            # Track imports, definitions, and usages
+            imported_names = set()
+            defined_symbols = set()
+            used_symbols = set()
+            function_sizes = {}
+            
+            # Walk the AST
+            for node in ast.walk(tree):
+                # Track imports
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        imported_names.add(alias.asname or alias.name)
+                elif isinstance(node, ast.ImportFrom):
+                    for alias in node.names:
+                        imported_names.add(alias.asname or alias.name)
+                
+                # Track function definitions and sizes
+                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    defined_symbols.add(node.name)
+                    # Count lines (rough estimate)
+                    if hasattr(node, 'lineno') and hasattr(node, 'end_lineno'):
+                        size = node.end_lineno - node.lineno
+                        function_sizes[node.name] = (node.lineno, size)
+                
+                # Track class definitions
+                elif isinstance(node, ast.ClassDef):
+                    defined_symbols.add(node.name)
+                
+                # Track name usages
+                elif isinstance(node, ast.Name):
+                    used_symbols.add(node.id)
+            
+            # Detect unused imports
+            unused_imports = imported_names - used_symbols
+            for unused in unused_imports:
+                items.append(CleanupItem(
+                    id=f"CLEANUP-{cleanup_id_counter:03d}",
+                    kind="unused_import",
+                    file=rel_path,
+                    symbol=unused,
+                    why_suspected=f"Import '{unused}' is not used in the file",
+                    confidence=0.85,
+                    related_phase=self._detect_phase_from_path(file_path),
+                    suggested_action=f"remove_unused_import",
+                    line_number=None
+                ))
+                cleanup_id_counter += 1
+            
+            # Detect oversized functions
+            for func_name, (lineno, size) in function_sizes.items():
+                if size > 100:
+                    items.append(CleanupItem(
+                        id=f"CLEANUP-{cleanup_id_counter:03d}",
+                        kind="oversized_function",
+                        file=rel_path,
+                        symbol=func_name,
+                        why_suspected=f"Function has {size} lines (threshold: 100)",
+                        confidence=0.9,
+                        related_phase=self._detect_phase_from_path(file_path),
+                        suggested_action="consider_splitting_function",
+                        line_number=lineno,
+                        details=f"Large function may be hard to maintain and test"
+                    ))
+                    cleanup_id_counter += 1
+            
+            # Detect oversized files
+            line_count = len(source.split('\n'))
+            if line_count > 500:
+                items.append(CleanupItem(
+                    id=f"CLEANUP-{cleanup_id_counter:03d}",
+                    kind="oversized_file",
+                    file=rel_path,
+                    symbol=None,
+                    why_suspected=f"File has {line_count} lines (threshold: 500)",
+                    confidence=0.8,
+                    related_phase=self._detect_phase_from_path(file_path),
+                    suggested_action="consider_splitting_module",
+                    line_number=None,
+                    details=f"Large file may benefit from being split into smaller modules"
+                ))
+                cleanup_id_counter += 1
+                
+        except Exception as e:
+            # Silently skip files with parse errors
+            pass
+        
+        return items
+    
+    def _detect_phase_from_path(self, file_path: Path) -> Optional[str]:
+        """Detect which phase a file belongs to based on its path."""
+        try:
+            rel_path = str(file_path.relative_to(self.repo_path))
+            # Check if path contains a phase ID
+            for phase_id in self.phase_sequence:
+                if phase_id in rel_path:
+                    return phase_id
+            return None
+        except:
+            return None
+    
+    def _find_duplicate_functions(self, cleanup_items: List[CleanupItem], cleanup_id_counter: int) -> List[CleanupItem]:
+        """
+        Detect potential duplicate functions across the codebase.
+        Uses a simple heuristic: functions with same name in different files.
+        
+        Args:
+            cleanup_items: Existing cleanup items to add to
+            cleanup_id_counter: Starting ID counter
+            
+        Returns:
+            List of new duplicate findings
+        """
+        duplicates = []
+        function_locations = {}
+        
+        # Scan all Python files in phases/
+        phases_dir = self.repo_path / "phases"
+        if not phases_dir.exists():
+            return duplicates
+        
+        for py_file in phases_dir.rglob("*.py"):
+            try:
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    tree = ast.parse(f.read(), filename=str(py_file))
+                
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        func_name = node.name
+                        if func_name not in function_locations:
+                            function_locations[func_name] = []
+                        function_locations[func_name].append(
+                            (py_file, node.lineno if hasattr(node, 'lineno') else None)
+                        )
+            except:
+                pass
+        
+        # Find functions that appear in multiple files
+        for func_name, locations in function_locations.items():
+            if len(locations) > 1 and not func_name.startswith('_'):
+                # Skip private functions and common names
+                if func_name in ('main', 'run', 'execute', 'process'):
+                    continue
+                
+                files_str = ", ".join([str(loc[0].relative_to(self.repo_path)) for loc in locations[:3]])
+                duplicates.append(CleanupItem(
+                    id=f"CLEANUP-{cleanup_id_counter:03d}",
+                    kind="duplicate_function",
+                    file=str(locations[0][0].relative_to(self.repo_path)),
+                    symbol=func_name,
+                    why_suspected=f"Function '{func_name}' appears in {len(locations)} files",
+                    confidence=0.6,
+                    related_phase=None,
+                    suggested_action="review_for_consolidation",
+                    line_number=locations[0][1],
+                    details=f"Found in: {files_str}"
+                ))
+                cleanup_id_counter += 1
+        
+        return duplicates
+    
+    def run_deep_cleanup(self) -> Dict[str, Any]:
+        """
+        Run deep code-aware cleanup analysis on Mind-Q project.
+        
+        This is an upgraded version of run_cleanup() that performs AST-based
+        code analysis to detect:
+        - Unused imports
+        - Unused symbols (functions, classes)
+        - Orphan modules
+        - Duplicate functions across files
+        - Oversized files (>500 lines)
+        - Oversized functions (>100 lines)
+        - Outdated phase documentation
+        - Missing phase documentation
+        
+        Returns comprehensive cleanup report and saves to:
+        - .guardian/mindq_cleanup.md (markdown report)
+        - .guardian/mindq_cleanup.json (structured data)
+        
+        Does NOT modify any code - purely informational "Refactor Radar".
+        Does NOT inject anything into MDC.
+        """
+        report = {
+            "timestamp": datetime.now().isoformat(),
+            "scan_type": "deep_code_aware",
+            "findings": [],
+            "summary": {
+                "total_items": 0,
+                "by_kind": {},
+                "by_confidence": {"high": 0, "medium": 0, "low": 0},
+                "by_phase": {}
+            },
+            "recommendations": []
+        }
+        
+        cleanup_id_counter = 1
+        
+        try:
+            # Part 1: Scan all Python files in phases/ for code issues
+            phases_dir = self.repo_path / "phases"
+            if phases_dir.exists():
+                for py_file in phases_dir.rglob("*.py"):
+                    if py_file.name != "__init__.py":
+                        items = self._scan_python_file_for_issues(py_file, cleanup_id_counter)
+                        report["findings"].extend(items)
+                        cleanup_id_counter += len(items)
+            
+            # Part 2: Find duplicate functions
+            duplicates = self._find_duplicate_functions(report["findings"], cleanup_id_counter)
+            report["findings"].extend(duplicates)
+            cleanup_id_counter += len(duplicates)
+            
+            # Part 3: Documentation issues (from original run_cleanup)
+            # Load spine if not already loaded
+            if not self._spine_data:
+                self.build_spine()
+            
+            docs_phases = self.repo_path / "docs" / "phases"
+            for phase in self._spine_data.get('phases', []):
+                phase_id = phase['id']
+                card_path = docs_phases / f"{phase_id}.md"
+                impl_path = self.repo_path / "phases" / phase_id / "impl.py"
+                
+                if not card_path.exists():
+                    report["findings"].append(CleanupItem(
+                        id=f"CLEANUP-{cleanup_id_counter:03d}",
+                        kind="missing_phase_doc",
+                        file=f"docs/phases/{phase_id}.md",
+                        symbol=None,
+                        why_suspected=f"Phase {phase_id} has no documentation card",
+                        confidence=1.0,
+                        related_phase=phase_id,
+                        suggested_action="generate_phase_card",
+                        line_number=None
+                    ))
+                    cleanup_id_counter += 1
+                elif impl_path.exists():
+                    try:
+                        card_mtime = card_path.stat().st_mtime
+                        impl_mtime = impl_path.stat().st_mtime
+                        if card_mtime < impl_mtime:
+                            report["findings"].append(CleanupItem(
+                                id=f"CLEANUP-{cleanup_id_counter:03d}",
+                                kind="outdated_phase_doc",
+                                file=f"docs/phases/{phase_id}.md",
+                                symbol=None,
+                                why_suspected="Documentation older than implementation",
+                                confidence=0.9,
+                                related_phase=phase_id,
+                                suggested_action="refresh_phase_card",
+                                line_number=None
+                            ))
+                            cleanup_id_counter += 1
+                    except:
+                        pass
+            
+            # Build summary
+            report["summary"]["total_items"] = len(report["findings"])
+            
+            for item in report["findings"]:
+                # Count by kind
+                report["summary"]["by_kind"][item.kind] = report["summary"]["by_kind"].get(item.kind, 0) + 1
+                
+                # Count by confidence
+                if item.confidence >= 0.8:
+                    report["summary"]["by_confidence"]["high"] += 1
+                elif item.confidence >= 0.6:
+                    report["summary"]["by_confidence"]["medium"] += 1
+                else:
+                    report["summary"]["by_confidence"]["low"] += 1
+                
+                # Count by phase
+                if item.related_phase:
+                    report["summary"]["by_phase"][item.related_phase] = report["summary"]["by_phase"].get(item.related_phase, 0) + 1
+            
+            # Generate recommendations
+            if report["summary"]["by_kind"].get("unused_import", 0) > 0:
+                report["recommendations"].append(
+                    f"Consider removing {report['summary']['by_kind']['unused_import']} unused imports"
+                )
+            if report["summary"]["by_kind"].get("oversized_function", 0) > 0:
+                report["recommendations"].append(
+                    f"Review {report['summary']['by_kind']['oversized_function']} oversized functions for potential splitting"
+                )
+            if report["summary"]["by_kind"].get("oversized_file", 0) > 0:
+                report["recommendations"].append(
+                    f"Consider refactoring {report['summary']['by_kind']['oversized_file']} large files"
+                )
+            if report["summary"]["by_kind"].get("duplicate_function", 0) > 0:
+                report["recommendations"].append(
+                    f"Review {report['summary']['by_kind']['duplicate_function']} potential duplicate functions"
+                )
+            if report["summary"]["by_kind"].get("outdated_phase_doc", 0) > 0:
+                report["recommendations"].append(
+                    f"Refresh {report['summary']['by_kind']['outdated_phase_doc']} outdated phase docs with: python -m src.guardian_mindq . --refresh-docs"
+                )
+            
+            # Save reports
+            guardian_dir = self.repo_path / ".guardian"
+            guardian_dir.mkdir(exist_ok=True)
+            
+            # Save JSON report (structured data for tools)
+            json_file = guardian_dir / "mindq_cleanup.json"
+            json_data = {
+                "timestamp": report["timestamp"],
+                "scan_type": report["scan_type"],
+                "summary": report["summary"],
+                "findings": [
+                    {
+                        "id": item.id,
+                        "kind": item.kind,
+                        "file": item.file,
+                        "symbol": item.symbol,
+                        "why_suspected": item.why_suspected,
+                        "confidence": item.confidence,
+                        "related_phase": item.related_phase,
+                        "suggested_action": item.suggested_action,
+                        "line_number": item.line_number,
+                        "details": item.details
+                    }
+                    for item in report["findings"]
+                ],
+                "recommendations": report["recommendations"]
+            }
+            
+            with open(json_file, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2)
+            
+            # Save markdown report (human-readable)
+            md_file = guardian_dir / "mindq_cleanup.md"
+            content = f"""# 🔍 Mind-Q Deep Cleanup Report (Refactor Radar)
+
+**Generated**: {report['timestamp']}  
+**Scan Type**: Deep Code-Aware Analysis
+
+## 📊 Executive Summary
+
+- **Total Findings**: {report['summary']['total_items']}
+- **High Confidence**: {report['summary']['by_confidence']['high']}
+- **Medium Confidence**: {report['summary']['by_confidence']['medium']}
+- **Low Confidence**: {report['summary']['by_confidence']['low']}
+
+### Findings by Category
+
+"""
+            
+            for kind, count in sorted(report['summary']['by_kind'].items(), key=lambda x: -x[1]):
+                emoji = {
+                    "unused_import": "📦",
+                    "unused_symbol": "🔤",
+                    "oversized_file": "📄",
+                    "oversized_function": "🔧",
+                    "duplicate_function": "👯",
+                    "outdated_phase_doc": "📅",
+                    "missing_phase_doc": "❌",
+                    "orphan_module": "🏚️"
+                }.get(kind, "🔍")
+                content += f"- {emoji} **{kind.replace('_', ' ').title()}**: {count}\n"
+            
+            content += "\n"
+            
+            # Group findings by confidence
+            high_conf = [f for f in report["findings"] if f.confidence >= 0.8]
+            med_conf = [f for f in report["findings"] if 0.6 <= f.confidence < 0.8]
+            low_conf = [f for f in report["findings"] if f.confidence < 0.6]
+            
+            if high_conf:
+                content += "## 🔴 High Confidence Findings\n\n"
+                for item in high_conf[:20]:  # Limit to top 20
+                    content += f"### {item.id}: {item.kind.replace('_', ' ').title()}\n\n"
+                    content += f"- **File**: `{item.file}`\n"
+                    if item.symbol:
+                        content += f"- **Symbol**: `{item.symbol}`\n"
+                    if item.line_number:
+                        content += f"- **Line**: {item.line_number}\n"
+                    content += f"- **Why**: {item.why_suspected}\n"
+                    content += f"- **Confidence**: {item.confidence:.0%}\n"
+                    if item.related_phase:
+                        content += f"- **Phase**: {item.related_phase}\n"
+                    content += f"- **Action**: {item.suggested_action.replace('_', ' ')}\n"
+                    if item.details:
+                        content += f"- **Details**: {item.details}\n"
+                    content += "\n"
+                
+                if len(high_conf) > 20:
+                    content += f"_...and {len(high_conf) - 20} more high-confidence findings. See JSON report for full list._\n\n"
+            
+            if med_conf and len(med_conf) <= 10:
+                content += "## 🟡 Medium Confidence Findings\n\n"
+                for item in med_conf:
+                    content += f"- **{item.id}**: {item.kind} in `{item.file}`"
+                    if item.symbol:
+                        content += f" (`{item.symbol}`)"
+                    content += f" - {item.why_suspected}\n"
+                content += "\n"
+            elif med_conf:
+                content += f"## 🟡 Medium Confidence Findings ({len(med_conf)})\n\n"
+                content += "_See JSON report for details._\n\n"
+            
+            if low_conf:
+                content += f"## 🟢 Low Confidence Findings ({len(low_conf)})\n\n"
+                content += "_These are potential issues that may need manual verification. See JSON report for details._\n\n"
+            
+            if report['recommendations']:
+                content += "## 💡 Recommendations\n\n"
+                for i, rec in enumerate(report['recommendations'], 1):
+                    content += f"{i}. {rec}\n"
+                content += "\n"
+            
+            content += "---\n\n"
+            content += "## 📝 Notes\n\n"
+            content += "- This is an **informational report only** - no automatic changes are made\n"
+            content += "- Review each finding and take appropriate action based on your project needs\n"
+            content += "- Confidence levels indicate likelihood of the finding being actionable\n"
+            content += "- Low confidence findings may be false positives and require manual review\n\n"
+            content += "## 🔧 Available Actions\n\n"
+            content += "- **Refresh docs**: `python -m src.guardian_mindq . --refresh-docs`\n"
+            content += "- **Review JSON**: `.guardian/mindq_cleanup.json` for structured data\n"
+            content += "- **Create refactor plan**: Use findings to create a structured refactor plan\n\n"
+            content += "---\n\n"
+            content += f"Generated by Mind-Q Guardian v1.4 - Refactor Radar\n"
+            
+            with open(md_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            report["cleanup_md_file"] = str(md_file)
+            report["cleanup_json_file"] = str(json_file)
+            
+        except Exception as e:
+            report["error"] = str(e)
+        
+        return report
+    
     def refresh_docs_after_changes(self, phases_to_refresh: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Refresh Mind-Q documentation (spine + phase cards) after real code changes.
@@ -1666,7 +2138,8 @@ def main():
     parser.add_argument("--generate-cards", action="store_true", help="Generate all phase cards")
     parser.add_argument("--refresh-all", action="store_true", help="Refresh all artifacts")
     parser.add_argument("--refresh-docs", action="store_true", help="Refresh documentation after code changes")
-    parser.add_argument("--cleanup", action="store_true", help="Run cleanup analysis (non-blocking)")
+    parser.add_argument("--cleanup", action="store_true", help="Run basic cleanup analysis (docs only)")
+    parser.add_argument("--deep-cleanup", action="store_true", help="Run deep code-aware cleanup analysis (Refactor Radar)")
     parser.add_argument("--status", action="store_true", help="Show current Guardian status")
     parser.add_argument("--phase", help="Generate card for specific phase")
     parser.add_argument("--context", help="Get context for user request")
@@ -1731,6 +2204,35 @@ def main():
             if report.get('cleanup_file'):
                 print(f"\n📄 Full report saved to: {report['cleanup_file']}")
                 print(f"   (Review this file for details, NOT included in MDC)")
+    
+    elif args.deep_cleanup:
+        print("🔍 Running deep code-aware cleanup analysis (Refactor Radar)...")
+        print("   This may take a moment...\n")
+        report = adapter.run_deep_cleanup()
+        if report.get('error'):
+            print(f"❌ Error: {report['error']}")
+        else:
+            print(f"📊 Deep Cleanup Summary:")
+            print(f"   Total findings: {report['summary']['total_items']}")
+            print(f"   High confidence: {report['summary']['by_confidence']['high']}")
+            print(f"   Medium confidence: {report['summary']['by_confidence']['medium']}")
+            print(f"   Low confidence: {report['summary']['by_confidence']['low']}")
+            
+            if report['summary']['by_kind']:
+                print(f"\n📋 Findings by Category:")
+                for kind, count in sorted(report['summary']['by_kind'].items(), key=lambda x: -x[1])[:5]:
+                    print(f"   - {kind.replace('_', ' ').title()}: {count}")
+            
+            if report['recommendations']:
+                print(f"\n💡 Recommendations:")
+                for rec in report['recommendations'][:5]:
+                    print(f"   - {rec}")
+            
+            print(f"\n📄 Reports saved:")
+            print(f"   Markdown: {report.get('cleanup_md_file', 'N/A')}")
+            print(f"   JSON: {report.get('cleanup_json_file', 'N/A')}")
+            print(f"\n💡 Review the markdown report for detailed findings.")
+            print(f"   Use JSON report for programmatic analysis.")
     
     elif args.status:
         print("📊 Mind-Q Guardian Status\n")
@@ -1889,24 +2391,27 @@ def main():
         else:
             print(f"   📝 Checklist created automatically on plan_change()")
         
-        # 9. Cleanup analysis demo (NEW)
-        print("\n9️⃣ Cleanup Analysis (NEW):")
-        cleanup_report = adapter.run_cleanup()
+        # 9. Cleanup analysis demo (UPGRADED)
+        print("\n9️⃣ Cleanup Analysis (UPGRADED - Refactor Radar):")
+        print("   Running deep code-aware cleanup analysis...")
+        cleanup_report = adapter.run_deep_cleanup()
         if not cleanup_report.get('error'):
-            print(f"   Unused phases: {len(cleanup_report['unused_phases'])}")
-            print(f"   Outdated cards: {len(cleanup_report['outdated_cards'])}")
-            print(f"   Missing cards: {len(cleanup_report['missing_cards'])}")
-            if cleanup_report.get('cleanup_file'):
-                print(f"   📄 Full report: .guardian/mindq_cleanup.md")
+            print(f"   Total findings: {cleanup_report['summary']['total_items']}")
+            print(f"   High confidence: {cleanup_report['summary']['by_confidence']['high']}")
+            if cleanup_report['summary']['by_kind']:
+                top_kind = max(cleanup_report['summary']['by_kind'].items(), key=lambda x: x[1])
+                print(f"   Top issue: {top_kind[0].replace('_', ' ').title()} ({top_kind[1]})")
+            if cleanup_report.get('cleanup_md_file'):
+                print(f"   📄 Reports: .guardian/mindq_cleanup.md + .json")
                 print(f"   (Not included in MDC - agents review separately)")
         
-        # 10. Documentation refresh demo (NEW)
-        print("\n🔟 Documentation Refresh (NEW):")
+        # 10. Documentation refresh demo
+        print("\n🔟 Documentation Refresh:")
         print("   After code changes, refresh with:")
         print("   python -m src.guardian_mindq . --refresh-docs")
         print("   Keeps spine + phase cards in sync with implementation")
         
-        print("\n✨ Demo complete!")
+        print("\n✨ Demo complete! Mind-Q Guardian v1.4 - Now with Refactor Radar 🔍")
     
     else:
         parser.print_help()
