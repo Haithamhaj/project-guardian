@@ -473,9 +473,13 @@ guardian_version: enhanced_v1.0
         # Generate enhanced MDC
         content = self.generate_enhanced_mdc(scan_results)
         
-        # Save
+        # Save compact MDC
         output_path.write_text(content)
         print(f"\n✅ Enhanced Guardian saved: {output_path}")
+        
+        # Save full file index separately (not for LLM context)
+        guardian_dir = self.project_path / '.guardian'
+        self.scanner.save_file_index(guardian_dir)
         
         # Also save to IDE-specific locations
         self._save_to_ide_locations(content)
